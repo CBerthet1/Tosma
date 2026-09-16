@@ -8,8 +8,7 @@ import { desc } from 'drizzle-orm';
 // Fonction pour récupérer les réservations
 
 
-export default async function Reservations_tab() {
-  // Récupérer les 10 dernières réservations
+export default async function Matos_tab() {
   const matos_list = await db.select()
     .from(matosTable)
     .orderBy(desc(matosTable.id))

@@ -1,162 +1,100 @@
-
-
-
+import Link from "next/link";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import Reservations_tab from "@/app/actions_serveur/Reservations_tab"
-import  {BoutonAddResa}  from "@/components/ui/addResa_button"
-import matos_tab from "./actions_serveur/matos_tab";
+import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
+import Matos_tab from "./actions_serveur/matos_tab"; 
+import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 
+// On type les searchParams pour l'URL
+type PageProps = {
+  searchParams: Promise<{ tab?: string }>;
+};
 
-
-
-
-
-export default function Home() {
-  
+// Ne pas oublier "async" puisque searchParams est une Promise dans Next.js
+export default async function Home({ searchParams }: PageProps) {
+  // On récupère l'onglet actif (par défaut : resas)
+  const { tab = "resas" } = await searchParams;
 
   return (
-    <div className={`flex flex-col flex-1 items-center justify-center font-sans `}>
-      
-      <main className="flex flex-1 w-full flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gaptyp-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-2xl text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-2xl text-lg leading-8 text-zinc-600 zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col flex-1 items-center justify-center font-sans">
+      <main className="flex flex-1 w-full flex-col items-center py-16 px-8 bg-white dark:bg-black sm:items-start max-w-4xl mx-auto">
+        
+        {/* En-tête avec ton Logo Next.js */}
+        <div className="mb-12 flex justify-between w-full items-center">
+          <Image
+            className="dark:invert"
+            src="/next.svg"
+            alt="Next.js logo"
+            width={100}
+            height={20}
+            priority
+            style={{ width: 'auto', height: 'auto' }} // Fix pour l'avertissement d'hydratation de l'image
+          />
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
         </div>
-        <div>
-          <div className="flex flex-col items-center gaptyp-6 text-center sm:items-start sm:text-left">
-            <BoutonAddResa/>
-            <BoutonAddMatos/>
-          </div>
-        </div>
-        {Reservations_tab()}
-        {matos_tab()}
-        {}
-        <div className="flex flex-col items-center gaptyp-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col items-center gaptyp-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tdark:text-ight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col items-center gaptyp-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* --- SYSTÈME D'ONGLETS --- */}
+        <div className="flex gap-4 border-b border-gray-200 mb-8 w-full">
+          <Link
+            href="/?tab=resas"
+            className={`py-2 px-4 border-b-2 font-medium transition-colors ${
+              tab === "resas"
+                ? "border-black text-black dark:border-white dark:text-white"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Réservations
+          </Link>
+          <Link
+            href="/?tab=matos"
+            className={`py-2 px-4 border-b-2 font-medium transition-colors ${
+              tab === "matos"
+                ? "border-black text-black dark:border-white dark:text-white"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
           >
-            Documentation
-          </a>
+            Matériel
+          </Link>
         </div>
-        <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>eeeee</AvatarFallback>
-      </Avatar>
+
+        {/* --- CONTENU DYNAMIQUE --- */}
+        <div className="w-full">
+          
+          {/* ONGLET 1 : RÉSERVATIONS */}
+          {tab === "resas" && (
+            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold dark:text-white">Gestion des Réservations</h2>
+                {/* On place le bouton d'ajout uniquement dans cet onglet */}
+                <BoutonAddResa />
+              </div>
+              
+              {/* On appelle le composant avec la syntaxe JSX */}
+              <Reservations_tab />
+            </div>
+          )}
+
+          {/* ONGLET 2 : MATÉRIEL */}
+          {tab === "matos" && (
+            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold dark:text-white">Inventaire du Matériel</h2>
+                {/* On place le bouton d'ajout uniquement dans cet onglet */}
+                <BoutonAddMatos />
+              </div>
+
+              {/* On appelle le composant avec la syntaxe JSX */}
+              <Matos_tab />
+            </div>
+          )}
+        </div>
+
       </main>
     </div>
-    
   );
 }
