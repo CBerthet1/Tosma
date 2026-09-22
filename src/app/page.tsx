@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { db } from "../../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
+import { matosTable } from "../../drizzle/schema";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 
@@ -16,6 +17,7 @@ type PageProps = {
 export default async function Home({ searchParams }: PageProps) {
   // On récupère l'onglet actif (par défaut : resas)
   const { tab = "resas" } = await searchParams;
+  const allMatos = await db.select().from(matosTable);
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center font-sans">
@@ -81,7 +83,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET 3 : Rajouter Resa */}
           {tab === "Nouvelle-Réservation" && (
             <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-              <BoutonAddResa />
+              <BoutonAddResa matosList={allMatos} />
             </div>
           )}
         </div>
