@@ -1,7 +1,7 @@
 'use server'; // Ce composant est côté serveur
 
-import { db } from "../../../drizzle/db";
-import { matosTable } from "../../../drizzle/schema";
+import { db } from "../../drizzle/db";
+import { matosTable } from "../../drizzle/schema";
 import { desc } from 'drizzle-orm';
 
 

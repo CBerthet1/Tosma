@@ -1,7 +1,7 @@
 'use server';
 
-import { db } from "../../../drizzle/db";
-import { resaTable, resaMatosTable } from "../../../drizzle/schema";
+import { db } from "../../drizzle/db";
+import { resaTable, resaMatosTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
 
 export async function newResa(

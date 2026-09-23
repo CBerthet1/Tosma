@@ -1,6 +1,6 @@
 'use server';
-import { db } from "../../../drizzle/db";
-import { resaTable } from "../../../drizzle/schema";
+import { db } from "../../drizzle/db";
+import { resaTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 

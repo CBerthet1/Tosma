@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { db } from "../../drizzle/db";
+import { db } from "../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
-import { matosTable } from "../../drizzle/schema";
+import { matosTable } from "../drizzle/schema";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 

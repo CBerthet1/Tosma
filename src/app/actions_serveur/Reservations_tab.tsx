@@ -1,7 +1,7 @@
 'use server'; // Ce composant est côté serveur
 
-import { db } from "../../../drizzle/db";
-import { resaTable } from "../../../drizzle/schema";
+import { db } from "../../drizzle/db";
+import { resaTable } from "../../drizzle/schema";
 import { desc } from 'drizzle-orm';
 import {DeleteResa_button} from "@/components/ui/deleteResa_button"; 
 
