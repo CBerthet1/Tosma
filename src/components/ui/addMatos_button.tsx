@@ -62,6 +62,31 @@ export function BoutonAddMatos() {
             
           </div>
         </div>
+        <div className="space-y-4">
+
+          {/* Intitulé de la réservation */}
+          <div className="space-y-1.5">
+            <label 
+              htmlFor="res-category" 
+              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+            >
+              Catégorie
+            </label>
+            <select
+              id="res-category"
+              value={categorie}
+              onChange={(e) => setCategorie(e.target.value)}
+              required
+              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300 appearance-none"
+            >
+              <option value="" disabled>Sélectionnez une option</option>
+              <option value="caméra">Caméra</option>
+              <option value="objo">Objo</option>
+              <option value="rej">Rej</option>
+              <option value="light">Light</option>
+            </select>
+          </div>
+        </div>
           
 
         {/* Actions */}
