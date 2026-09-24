@@ -9,6 +9,7 @@ import { useState } from "react";
 export function BoutonAddMatos() {
  
   const [name, setName] = useState("");
+  const [categorie, setCategorie] = useState("");
   const [loading, setLoading] = useState(false); // gère l'état de chargement du bouton quand on soumet le formulaire
 
 
@@ -17,10 +18,11 @@ export function BoutonAddMatos() {
       
 
       // Envoi vers le serveur
-      await newMatos( name);
+      await newMatos( name, categorie);
 
       // Remise à zéro des champs
       setName("");
+      setCategorie("");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
     } finally {
@@ -57,6 +59,7 @@ export function BoutonAddMatos() {
               required
               className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
             />
+            
           </div>
         </div>
           

@@ -24,6 +24,7 @@ export default async function Matos_tab() {
             <tr>
               <th className="px-4 py-2 text-left">ID</th>
               <th className="px-4 py-2 text-left">Nom</th>
+              <th className="px-4 py-2 text-left">Catégorie</th>
             </tr>
           </thead>
           <tbody>
@@ -31,6 +32,8 @@ export default async function Matos_tab() {
               <tr key={matos.id} className="border-t border-gray-500 dark:border-gray-700">
                 <td className="px-4 py-2">{matos.id}</td>
                 <td className="px-4 py-2">{matos.name}</td>
+                <td className="px-4 py-2">{matos.categorie}</td>
+                
   
               </tr>
             ))}
