@@ -21,6 +21,7 @@ export default async function Reservations_tab() {
     end: new Date(resa.end),
     
   }));
+  
 
   return (
     <div className="w-full h-full flex flex-col">
