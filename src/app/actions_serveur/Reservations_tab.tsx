@@ -11,8 +11,7 @@ import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa";
 export default async function Reservations_tab() {
   // Récupérer les 10 dernières réservations
   const reservations = await db.select()
-    .from(resaTable)
-    .orderBy(desc(resaTable.start));
+    .from(resaTable);
 
   const calendarEvents: Reservation[] = reservations.map((resa) => ({
     id: resa.id,
@@ -21,7 +20,7 @@ export default async function Reservations_tab() {
     end: new Date(resa.end),
     
   }));
-  
+  console.log("Semai :",reservations);
 
   return (
     <div className="w-full h-full flex flex-col">
