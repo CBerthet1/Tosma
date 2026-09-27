@@ -5,9 +5,32 @@ import { resaTable } from "../../drizzle/schema";
 import { desc } from 'drizzle-orm';
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
 
+// Une palette de jolies couleurs 
+const PASTEL_COLORS =  [
+  "#b08d55", // Amber (Moutarde grisée)
+  "#5e7b99", // Blue (Bleu acier/denim)
+  "#608a70", // Emerald (Vert sauge)
+  "#827397", // Violet (Mauve désaturé)
+  "#a36e7f", // Pink (Vieux rose sombre)
+  "#9e6060", // Red (Rouge brique terne)
+  "#5c8787", // Teal (Gris-vert canard)
+  "#a87b5d", // Orange (Terre cuite grisée)
+  "#628e99", // Cyan (Bleu cadet pâle)
+  "#6e7399", // Indigo (Bleu ardoise)
+];
+
+// Fonction qui donne toujours la même couleur pour un même texte ou ID
+function getStringColor(str: string | number) {
+  const stringValue = String(str);
+  let hash = 0;
+  for (let i = 0; i < stringValue.length; i++) {
+    hash = stringValue.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % PASTEL_COLORS.length;
+  return PASTEL_COLORS[index];
+}
+
 // Fonction pour récupérer les réservations
-
-
 export default async function Reservations_tab() {
   // Récupérer les 10 dernières réservations
   const reservations = await db.select()
@@ -18,7 +41,7 @@ export default async function Reservations_tab() {
     title: `${resa.name}`, 
     start: new Date(resa.start),
     end: new Date(resa.end),
-    
+    color: getStringColor(resa.id),
   }));
   console.log("Semai :",reservations);
 
@@ -29,3 +52,4 @@ export default async function Reservations_tab() {
     </div>
   );
 }
+
