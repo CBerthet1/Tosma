@@ -172,91 +172,86 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
       </div>
 
       {/* CORPS : GRILLE DES HEURES ET ÉVÉNEMENTS */}
+      {/* CORPS : Grille des heures et créneaux */}
       <div className="flex flex-1 overflow-y-auto relative">
-        <div className="w-16 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-black z-10">
-          {hours.map((hour, i) => (
-            <div
-              key={i}
-              className="text-xs text-gray-400 text-right pr-2 absolute w-full"
-              style={{ top: i * 60 * PIXELS_PER_MINUTE - 8 }}
-            >
-              {hour}h00
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-1 relative bg-white dark:bg-black">
-          <div className="absolute inset-0 pointer-events-none">
-            {hours.map((_, i) => (
+        
+        {/* NOUVEAU CONTENEUR POUR FORCER LE SCROLL */}
+        <div 
+          className="flex w-full" 
+          style={{ minHeight: `${(END_HOUR - START_HOUR) * 60 * PIXELS_PER_MINUTE}px` }}
+        >
+          
+          {/* Colonne des heures */}
+          <div className="w-16 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-black z-10">
+            {hours.map((hour, i) => (
               <div
                 key={i}
-                className="w-full border-b border-gray-100 dark:border-gray-800/50 absolute"
-                style={{ top: i * 60 * PIXELS_PER_MINUTE }}
-              />
+                className="text-xs text-gray-400 text-right pr-2 absolute w-full"
+                style={{ top: i * 60 * PIXELS_PER_MINUTE - 8 }}
+              >
+                {hour}h00
+              </div>
             ))}
           </div>
 
-          {days.map((day, dayIndex) => {
-            const dayEvents = getEventsForDay(day);
-            const positions = calculateLayout(dayEvents);
-         
+          {/* Grille des jours */}
+          <div className="flex flex-1 relative bg-white dark:bg-black">
+            {/* Lignes horizontales de fond */}
+            <div className="absolute inset-0 pointer-events-none">
+              {hours.map((_, i) => (
+                <div
+                  key={i}
+                  className="w-full border-b border-gray-100 dark:border-gray-800/50 absolute"
+                  style={{ top: i * 60 * PIXELS_PER_MINUTE }}
+                />
+              ))}
+            </div>
 
-            return (
-              <div key={dayIndex} className="flex-1 relative border-r border-gray-200 dark:border-gray-800 last:border-0">
-                {dayEvents.map((event) => {
-                  const layout = positions[event.id] || { width: 100, left: 0 };
-                  
-                  // 1. Définir les limites de la journée en cours
-                  const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0);
-                  const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59);
+            {days.map((day, dayIndex) => {
+              const dayEvents = getEventsForDay(day);
+              const positions = calculateLayout(dayEvents);
 
-                  // 2. Clamper l'heure de début et de fin pour l'affichage dans CETTE colonne
-                  // Si ça a commencé un jour précédent, on force l'affichage à 0h00
-                  const visualStart = event.start < dayStart 
-                    ? new Date(day.getFullYear(), day.getMonth(), day.getDate(), START_HOUR, 0, 0) 
-                    : event.start;
+              return (
+                <div key={dayIndex} className="flex-1 relative border-r border-gray-200 dark:border-gray-800 last:border-0">
+                  {dayEvents.map((event) => {
+                    const layout = positions[event.id] || { width: 100, left: 0 };
                     
-                  // Si ça se termine un jour suivant, on force l'affichage à 24h00
-                  const visualEnd = event.end > dayEnd 
-                    ? new Date(day.getFullYear(), day.getMonth(), day.getDate(), END_HOUR, 0, 0) 
-                    : event.end;
+                    // ... (Ton code de calcul actuel avec visualStart, visualEnd, top, height) ...
+                    
+                    // Exemple de calcul pour rappel :
+                    const startMins = event.start.getHours() * 60 + event.start.getMinutes();
+                    let offsetMins = startMins - START_HOUR * 60;
+                    if (offsetMins < 0) offsetMins = 0; 
+                    const durationMins = (event.end.getTime() - event.start.getTime()) / 60000;
+                    const top = offsetMins * PIXELS_PER_MINUTE;
+                    const height = Math.max(durationMins * PIXELS_PER_MINUTE, 15); 
 
-                  // 3. Calculs de positionnement 
-                  const startMins = visualStart.getHours() * 60 + visualStart.getMinutes();
-                  let offsetMins = startMins - START_HOUR * 60;
-                  if (offsetMins < 0) offsetMins = 0; // Sécurité si l'event commence avant START_HOUR
-
-                  const durationMins = (visualEnd.getTime() - visualStart.getTime()) / 60000;
-                  const top = offsetMins * PIXELS_PER_MINUTE;
-                  // On donne une hauteur minimale pour que l'event reste cliquable même s'il est très court
-                  const height = Math.max(durationMins * PIXELS_PER_MINUTE, 15); 
-
-                  return (
-                    <div
-                      key={event.id}
-                      className="absolute rounded-md p-1.5 text-xs text-white overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-pointer border border-white/20"
-                      style={{
-                        top: `${top}px`,
-                        height: `${height}px`,
-                        left: `${layout.left}%`,
-                        width: `${layout.width}%`,
-                        
-                      }}
-                    >
-                      <div className="font-bold truncate">{event.title}</div>
-                      <div className="opacity-90 truncate text-[10px] mt-0.5">
-                        {/* On affiche les vraies dates sur l'étiquette, pas les dates coupées */}
-                        {event.start.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {event.start.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                        <br/>
-                        {event.end.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {event.end.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    return (
+                      <div
+                        key={event.id}
+                        className="absolute rounded-md p-1.5 text-xs text-white overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-pointer border border-white/20"
+                        style={{
+                          top: `${top}px`,
+                          height: `${height}px`,
+                          left: `${layout.left}%`,
+                          width: `${layout.width}%`,
+                          backgroundColor: "#f59e0b", // <-- IMPÉRATIF (ici un bel orange)
+                        }}
+                      >
+                        <div className="font-bold truncate">{event.title}</div>
+                        <div className="opacity-90 truncate text-[10px] mt-0.5">
+                          {event.start.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - 
+                          {event.end.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          
+        </div> {/* FIN DU NOUVEAU CONTENEUR SCROLLABLE */}
       </div>
     </div>
   );
