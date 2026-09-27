@@ -8,6 +8,7 @@ export type Reservation = {
   title: string;
   start: Date;
   end: Date;
+  color?: string;
 };
 
 type WeeklyCalendarProps = {
@@ -15,9 +16,9 @@ type WeeklyCalendarProps = {
 };
 
 // --- PARAMÈTRES D'AFFICHAGE ---
-const START_HOUR = 0;
-const END_HOUR = 23;
-const PIXELS_PER_MINUTE = 1.2;
+const START_HOUR = 0; // 00h00
+const END_HOUR = 24; // 24h00
+const TOTAL_GRID_MINUTES = (END_HOUR - START_HOUR) * 60; // 1440 minutes
 
 // --- FONCTION POUR OBTENIR LE LUNDI DE LA SEMAINE ---
 function getMonday(date: Date) {
@@ -31,14 +32,15 @@ function getMonday(date: Date) {
 
 // --- ALGORITHME DE SUPERPOSITION ---
 function calculateLayout(events: Reservation[]) {
-  const sorted = [...events].sort((a, b) => a.start.getTime() - b.start.getTime());
+  // On s'assure d'utiliser de vrais objets Date pour le tri
+  const sorted = [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
   const columns: Reservation[][] = [];
 
   sorted.forEach((event) => {
     let placed = false;
     for (let col of columns) {
       const lastEvent = col[col.length - 1];
-      if (lastEvent.end <= event.start) {
+      if (new Date(lastEvent.end) <= new Date(event.start)) {
         col.push(event);
         placed = true;
         break;
@@ -65,7 +67,6 @@ function calculateLayout(events: Reservation[]) {
 }
 
 export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
-  // Lundi de la semaine affichée
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
 
   // --- FONCTIONS DE NAVIGATION ---
@@ -98,26 +99,21 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
     });
   }, [currentWeekStart]);
 
-  const hours = Array.from({ length: END_HOUR - START_HOUR + 1 }).map((_, i) => START_HOUR + i);
+  // Générer les heures de 0 à 23
+  const hours = Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => START_HOUR + i);
 
+  // Filtrer les événements pour un jour donné
   const getEventsForDay = (dayDate: Date) => {
-    // Début et fin de la journée ciblée
     const dayStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 0, 0, 0);
     const dayEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 23, 59, 59);
 
     return reservations.filter((r) => {
-      // L'événement doit commencer avant la fin du jour ET se terminer après le début du jour
-      const rs = new Date(r.start);
-      const re = new Date(r.end);
-      console.log("Semaine affichée :",r);
-      return rs <= dayEnd && re >= dayStart;
-    }
-      );// Ajoute ceci juste avant le "return ("
-  
-  
+      const startDate = new Date(r.start);
+      const endDate = new Date(r.end);
+      return startDate <= dayEnd && endDate >= dayStart;
+    });
   };
 
-  // Libellé du mois / année affiché en haut
   const monthLabel = currentWeekStart.toLocaleDateString("fr-FR", {
     month: "long",
     year: "numeric",
@@ -132,7 +128,6 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
           <button
             onClick={handlePreviousWeek}
             className="p-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-            title="Semaine précédente"
           >
             ←
           </button>
@@ -145,12 +140,10 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
           <button
             onClick={handleNextWeek}
             className="p-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-            title="Semaine suivante"
           >
             →
           </button>
         </div>
-
         <span className="text-sm font-semibold capitalize text-gray-800 dark:text-gray-200">
           {monthLabel}
         </span>
@@ -171,42 +164,45 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
         ))}
       </div>
 
-      {/* CORPS : GRILLE DES HEURES ET ÉVÉNEMENTS */}
-      {/* CORPS : Grille des heures et créneaux */}
-      <div className="flex flex-1 overflow-y-auto relative">
+      
         
-        {/* NOUVEAU CONTENEUR POUR FORCER LE SCROLL */}
-        <div 
-          className="flex w-full" 
-          style={{ minHeight: `${(END_HOUR - START_HOUR) * 60 * PIXELS_PER_MINUTE}px` }}
-        >
+        {/* Le conteneur principal de la grille qui prend toute la hauteur dispo (min 600px) */}
+        <div className="flex flex-1 relative w-full min-h-[600px]">
           
           {/* Colonne des heures */}
           <div className="w-16 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-black z-10">
-            {hours.map((hour, i) => (
-              <div
-                key={i}
-                className="text-xs text-gray-400 text-right pr-2 absolute w-full"
-                style={{ top: i * 60 * PIXELS_PER_MINUTE - 8 }}
-              >
-                {hour}h00
-              </div>
-            ))}
+            {hours.map((hour, i) => {
+              const hourTopPercent = (i * 60 / TOTAL_GRID_MINUTES) * 100;
+              return (
+                <div
+                  key={i}
+                  className="text-xs text-gray-400 text-right pr-2 absolute w-full -translate-y-1/2"
+                  style={{ top: `${hourTopPercent}%` }}
+                >
+                  {hour}h00
+                </div>
+              );
+            })}
           </div>
 
           {/* Grille des jours */}
           <div className="flex flex-1 relative bg-white dark:bg-black">
+            
             {/* Lignes horizontales de fond */}
             <div className="absolute inset-0 pointer-events-none">
-              {hours.map((_, i) => (
-                <div
-                  key={i}
-                  className="w-full border-b border-gray-100 dark:border-gray-800/50 absolute"
-                  style={{ top: i * 60 * PIXELS_PER_MINUTE }}
-                />
-              ))}
+              {hours.map((_, i) => {
+                const lineTopPercent = (i * 60 / TOTAL_GRID_MINUTES) * 100;
+                return (
+                  <div
+                    key={i}
+                    className="w-full border-b border-gray-100 dark:border-gray-800/50 absolute"
+                    style={{ top: `${lineTopPercent}%` }}
+                  />
+                );
+              })}
             </div>
 
+            {/* Créneaux */}
             {days.map((day, dayIndex) => {
               const dayEvents = getEventsForDay(day);
               const positions = calculateLayout(dayEvents);
@@ -216,32 +212,42 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                   {dayEvents.map((event) => {
                     const layout = positions[event.id] || { width: 100, left: 0 };
                     
-                    // ... (Ton code de calcul actuel avec visualStart, visualEnd, top, height) ...
-                    
-                    // Exemple de calcul pour rappel :
-                    const startMins = event.start.getHours() * 60 + event.start.getMinutes();
-                    let offsetMins = startMins - START_HOUR * 60;
+                    const startDate = new Date(event.start);
+                    const endDate = new Date(event.end);
+
+                    const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0);
+                    const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59);
+
+                    const visualStart = startDate < dayStart ? dayStart : startDate;
+                    const visualEnd = endDate > dayEnd ? dayEnd : endDate;
+
+                    const startMins = visualStart.getHours() * 60 + visualStart.getMinutes();
+                    let offsetMins = startMins - (START_HOUR * 60); 
                     if (offsetMins < 0) offsetMins = 0; 
-                    const durationMins = (event.end.getTime() - event.start.getTime()) / 60000;
-                    const top = offsetMins * PIXELS_PER_MINUTE;
-                    const height = Math.max(durationMins * PIXELS_PER_MINUTE, 15); 
+
+                    const durationMins = (visualEnd.getTime() - visualStart.getTime()) / 60000;
+                    
+                    const topPercent = (offsetMins / TOTAL_GRID_MINUTES) * 100;
+                    const heightPercent = (durationMins / TOTAL_GRID_MINUTES) * 100;
+                    const finalHeight = Math.max(heightPercent, 1.5); 
 
                     return (
                       <div
                         key={event.id}
                         className="absolute rounded-md p-1.5 text-xs text-white overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-pointer border border-white/20"
                         style={{
-                          top: `${top}px`,
-                          height: `${height}px`,
+                          top: `${topPercent}%`,
+                          height: `${finalHeight}%`,
                           left: `${layout.left}%`,
                           width: `${layout.width}%`,
-                          backgroundColor: "#f59e0b", // <-- IMPÉRATIF (ici un bel orange)
+                          backgroundColor: event.color || "#f59e0b",
                         }}
                       >
                         <div className="font-bold truncate">{event.title}</div>
                         <div className="opacity-90 truncate text-[10px] mt-0.5">
-                          {event.start.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} - 
-                          {event.end.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          {startDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {startDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          <br/>
+                          {endDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {endDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                         </div>
                       </div>
                     );
@@ -250,9 +256,8 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
               );
             })}
           </div>
-          
-        </div> {/* FIN DU NOUVEAU CONTENEUR SCROLLABLE */}
+        </div>
       </div>
-    </div>
+    
   );
 }

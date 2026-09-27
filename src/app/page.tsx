@@ -20,8 +20,8 @@ export default async function Home({ searchParams }: PageProps) {
   const allMatos = await db.select().from(matosTable);
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center font-sans">
-      <main className="flex flex-1 w-full flex-col items-center py-16 px-8 bg-white dark:bg-black sm:items-start max-w-4xl mx-auto">
+    <div className="flex flex-col flex-1 min-h-screen items-center justify-center font-sans">
+      <main className="flex flex-1 w-full flex-col items-start py-8 bg-white dark:bg-black mx-auto">
         
         
         
