@@ -109,7 +109,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
       // L'événement doit commencer avant la fin du jour ET se terminer après le début du jour
       const rs = new Date(r.start);
       const re = new Date(r.end);
-      console.log("Semaine affichée :", r.start, re, dayStart, dayEnd, r.title);
+      console.log("Semaine affichée :",r);
       return rs <= dayEnd && re >= dayStart;
     }
       );// Ajoute ceci juste avant le "return ("
