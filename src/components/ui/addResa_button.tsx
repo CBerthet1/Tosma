@@ -181,26 +181,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
               Matériel à réserver
             </label>
             
-            {/* Affichage du matériel déjà sélectionné sous forme de tags */}
-            {selectedMatos.length > 0 && (
-              <div className="flex flex-wrap gap-2 pb-2">
-                {selectedMatos.map((item) => (
-                  <span 
-                    key={item.id} 
-                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  >
-                    {item.name}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMatos(item.id)}
-                      className="text-slate-400 hover:text-red-500 focus:outline-none"
-                    >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+            
 
             {/* Champ de saisie pour la recherche */}
             <input
@@ -236,6 +217,27 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             )}
           </div>
         </div> {/* <-- Il manquait la fermeture de la div globale "space-y-4" ici */}
+
+        {/* Affichage du matériel déjà sélectionné sous forme de tags */}
+            {selectedMatos.length > 0 && (
+              <div className="flex flex-wrap gap-2 pb-2">
+                {selectedMatos.map((item) => (
+                  <span 
+                    key={item.id} 
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    {item.name}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMatos(item.id)}
+                      className="text-slate-400 hover:text-red-500 focus:outline-none"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-2">

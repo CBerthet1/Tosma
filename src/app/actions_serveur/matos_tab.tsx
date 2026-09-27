@@ -22,7 +22,6 @@ export default async function Matos_tab() {
         <table className="min-w-full bg-white dark:bg-zinc-700 rounded-lg shadow">
           <thead className="bg-gray-350 dark:bg-gray-700">
             <tr>
-              <th className="px-4 py-2 text-left">ID</th>
               <th className="px-4 py-2 text-left">Nom</th>
               <th className="px-4 py-2 text-left">Catégorie</th>
             </tr>
@@ -30,7 +29,6 @@ export default async function Matos_tab() {
           <tbody>
             {matos_list.map((matos) => (
               <tr key={matos.id} className="border-t border-gray-500 dark:border-gray-700">
-                <td className="px-4 py-2">{matos.id}</td>
                 <td className="px-4 py-2">{matos.name}</td>
                 <td className="px-4 py-2">{matos.categorie}</td>
                 
