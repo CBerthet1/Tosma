@@ -43,7 +43,7 @@ export default async function Reservations_tab() {
     end: new Date(resa.end),
     color: getStringColor(resa.id),
   }));
-  console.log("Semai :",reservations);
+  
 
   return (
     <div className="w-full h-full flex flex-col">
