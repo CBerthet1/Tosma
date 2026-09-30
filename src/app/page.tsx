@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { db } from "../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
@@ -18,7 +19,9 @@ export default async function Home({ searchParams }: PageProps) {
   // On récupère l'onglet actif (par défaut : resas)
   const { tab = "resas" } = await searchParams;
   const allMatos = await db.select().from(matosTable);
+  const session = await auth();
 
+  const isAdmin = session?.user?.groups?.includes("geek") 
   return (
     <div className="flex flex-col flex-1 min-h-screen font-sans bg-white dark:bg-black">
       
@@ -45,7 +48,6 @@ export default async function Home({ searchParams }: PageProps) {
             >
               Planning
             </Link>
-
             <Link
               href="/?tab=Nouvelle-Réservation"
               className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
@@ -56,7 +58,7 @@ export default async function Home({ searchParams }: PageProps) {
             >
               Créer Réservation
             </Link>
-
+            {isAdmin && (
             <Link
               href="/?tab=matos"
               className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
@@ -67,6 +69,7 @@ export default async function Home({ searchParams }: PageProps) {
             >
               Matériel
             </Link>
+            )}
           </nav>
 
           {/* COLONNE 3 : MODE SOMBRE (À droite) */}
