@@ -1,10 +1,10 @@
-// Fichier : auth.ts
+// Gère le processus de connexion de l'utilisateur
 import NextAuth, { DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { authenticateWithLDAP } from "@/lib/ldap"
 
 declare module "next-auth" {
-  // On ajoute 'groups' à l'utilisateur renvoyé par la fonction authorize (par défaut, il n'y a que 'name' et 'email')
+  // On ajoute l'atribut 'groups' à l'utilisateur renvoyé par la fonction authorize (par défaut, il n'y a que 'name' et 'email')
   interface User {
     groups?: string[]
   }
@@ -18,8 +18,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       name: "Compte ",
       // 1. Définition du formulaire
       credentials: {
-        username: { label: "Identifiant", type: "text", placeholder: "jdupont" },
-        password: { label: "Mot de passe", type: "password" }
+        username: { label: "Identifiant", type: "text", placeholder: "test" },
+        password: { label: "Mot de passe", type: "password", placeholder: "test" }
       },
       
       // 2. La fonction de vérification
@@ -62,11 +62,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     
-    // Étape B : Quand ton application demande à lire la Session
+    // Étape B : Quand l'application demande à lire la Session
     async session({ session, token }) {
       // On transfère les groupes du token crypté vers l'objet session lisible
       if (session.user) {
-        // @ts-ignore (Si tu utilises TypeScript, il peut râler car 'groups' n'est pas standard)
+        // @ts-ignore (TypeScript peut râler car 'groups' n'est pas standard)
         session.user.groups = token.groups;
       }
       return session;

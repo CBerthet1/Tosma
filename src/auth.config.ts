@@ -1,15 +1,16 @@
+//gère la config de l'auth (séparation intérmédiaire et auth du ldap pour des questions de réactivité)
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
-  providers: [], // les providers lourds restent dans lib/auth.ts
+  providers: [], // les providers lourds restent dans auth.ts
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnLogin = nextUrl.pathname.startsWith("/login");
 
       if (isOnLogin) {
-        // Déjà connecté : on renvoie vers le dashboard
-        if (isLoggedIn) return Response.redirect(new URL("/dashboard", nextUrl));
+        // Déjà connecté : on renvoie vers la page d'accueil
+        if (isLoggedIn) return Response.redirect(new URL("/", nextUrl));
         return true;
       }
 

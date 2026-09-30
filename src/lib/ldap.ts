@@ -36,7 +36,7 @@ export async function authenticateWithLDAP(username: string, password: string) {
     const safeUsername = escapeLDAPFilter(username.trim());
 
     console.log("Étape 2 : Service connecté. Recherche de l'utilisateur :", safeUsername);
-    const { searchEntries } = await client.search('dc=entreprise,dc=com', { // ⚠️ Vérifie bien que tu as mis le vrai nom de domaine ici
+    const { searchEntries } = await client.search('dc=hyris,dc=tv', { 
       filter: `(uid=${safeUsername})`, 
       scope: 'sub',
       attributes: ['dn', 'displayName', 'MemberOf', 'memberOf'],
