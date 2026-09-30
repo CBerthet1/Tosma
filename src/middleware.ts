@@ -1,11 +1,9 @@
-import NextAuth from "next-auth"
-import { authConfig } from "./auth.config"
+import NextAuth from "next-auth";
+import { authConfig } from "./auth.config";
 
-// On initialise NextAuth uniquement avec la config légère
-const { auth } = NextAuth(authConfig)
-
-export const middleware = auth
+export default NextAuth(authConfig).auth;
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-}
+  // Exclut les routes d'auth, les assets statiques, etc.
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+};
