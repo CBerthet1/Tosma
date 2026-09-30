@@ -35,6 +35,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             groups: ["geek", "user"] 
           };
         }
+        if (credentials.username === "gt" && credentials.password === "t") {
+          return {
+            id: credentials.username as string, // Identifiant unique obligatoire pour NextAuth
+            name: "espèce de bot",
+            groups: ["user"] 
+          };
+        }
 
         // On appelle la fonction d'authentification LDAP 
         const user = await authenticateWithLDAP(
