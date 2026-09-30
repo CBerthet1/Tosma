@@ -36,6 +36,13 @@
       "when": 1789982421197,
       "tag": "0004_heavy_daredevil",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1790770344920,
+      "tag": "0005_perpetual_stryfe",
+      "breakpoints": true
     }
   ]
 }
