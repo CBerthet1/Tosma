@@ -24,8 +24,6 @@ export default async function Home({ searchParams }: PageProps) {
   const isAdmin = session?.user?.groups?.includes("geek") 
   return (
     <div className="flex flex-col flex-1 min-h-screen font-sans bg-white dark:bg-black">
-      
-      {/* --- HEADER (anciennement dans le layout) --- */}
       <header className="w-full border-b border-gray-200 dark:border-gray-800 bg-zinc-100 dark:bg-zinc-900/50">
         <div className="max-w-8xl mx-auto px-6 py-4 grid grid-cols-3 items-center gap-4">
           
@@ -37,7 +35,7 @@ export default async function Home({ searchParams }: PageProps) {
           </div>
 
           {/* COLONNE 2 : LES ONGLETS (Au centre, répartis sur 3 sous-colonnes) */}
-          <nav className="grid grid-cols-3 gap-2 bg-zinc-200/60 dark:bg-zinc-800/60 p-1 rounded-xl text-center">
+          <nav className={`grid gap-2 bg-zinc-200/60 dark:bg-zinc-800/60 p-1 rounded-xl text-center ${isAdmin ? "grid-cols-3" : "grid-cols-2"}`}>
             <Link
               href="/?tab=resas"
               className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
@@ -95,7 +93,7 @@ export default async function Home({ searchParams }: PageProps) {
           )}
 
           {/* ONGLET 2 : MATÉRIEL */}
-          {tab === "matos" && (
+          {tab === "matos" && isAdmin && (
             <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
               <BoutonAddMatos />
               <Matos_tab />
