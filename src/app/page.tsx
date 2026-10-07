@@ -8,6 +8,7 @@ import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 import { ThemeToggle } from "@/components/ui/switch-theme";
 import { FieldLabel } from "@/components/ui/field";
+import Image from "next/image";
 
 // On type les searchParams pour l'URL
 type PageProps = {
@@ -21,73 +22,78 @@ export default async function Home({ searchParams }: PageProps) {
   const allMatos = await db.select().from(matosTable);
   const session = await auth();
 
-  const isAdmin = session?.user?.groups?.includes("geek") 
+  const isAdmin = session?.user?.groups?.includes("geek");
+
   return (
-    <div className="flex flex-col flex-1 min-h-screen font-sans bg-white dark:bg-black">
-      <header className="w-full border-b border-gray-200 dark:border-gray-800 bg-zinc-100 dark:bg-zinc-900/50">
-        <div className="max-w-8xl mx-auto px-6 py-4 grid grid-cols-3 items-center gap-4">
-          
-          {/* COLONNE 1 : LOGO / TITRE (A gauche) */}
-          <div className="flex items-center">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Tosma
-            </h1>
+    <div className="flex flex-col flex-1 min-h-screen font-sans bg-background text-foreground">
+      <header className="w-full border-b border-border/80 bg-card/75 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-5 py-4 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+          <div className="flex items-center gap-3 lg:justify-self-start">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-slate-900 shadow-sm">
+              <Image
+                src="/Logo_Hyris_B.296795f9aab355349e2b.png"
+                alt="Logo de l’association"
+                width={44}
+                height={48}
+                unoptimized
+                className="h-11 w-10 object-contain"
+              />
+            </span>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-foreground">Tosma</h1>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">L’asso qui fait des images</p>
+            </div>
           </div>
 
-          {/* COLONNE 2 : LES ONGLETS (Au centre, répartis sur 3 sous-colonnes) */}
-          <nav className={`grid gap-2 bg-zinc-200/60 dark:bg-zinc-800/60 p-1 rounded-xl text-center ${isAdmin ? "grid-cols-3" : "grid-cols-2"}`}>
+          <nav className={`grid w-full max-w-xl gap-1 rounded-2xl border border-border/70 bg-secondary/75 p-1 text-center lg:w-auto ${isAdmin ? "grid-cols-3" : "grid-cols-2"}`}>
             <Link
               href="/?tab=resas"
-              className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
+              className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 tab === "resas"
-                  ? "bg-white text-black shadow dark:bg-zinc-700 dark:text-white"
-                  : "text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  ? "bg-primary/12 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
               }`}
             >
-              Planning
+              Le planning
             </Link>
             <Link
               href="/?tab=Nouvelle-Réservation"
-              className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
+              className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 tab === "Nouvelle-Réservation"
-                  ? "bg-white text-black shadow dark:bg-zinc-700 dark:text-white"
-                  : "text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  ? "bg-primary/12 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
               }`}
             >
-              Créer Réservation
+              Réserver
             </Link>
             {isAdmin && (
             <Link
               href="/?tab=matos"
-              className={`py-1.5 px-3 text-xs md:text-sm font-semibold rounded-lg transition-all ${
+              className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
                 tab === "matos"
-                  ? "bg-white text-black shadow dark:bg-zinc-700 dark:text-white"
-                  : "text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+                  ? "bg-primary/12 text-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
               }`}
             >
-              Matériel
+              Le matos
             </Link>
             )}
           </nav>
 
-          {/* COLONNE 3 : MODE SOMBRE (À droite) */}
-          <div className="flex justify-end items-center gap-3">
-            <FieldLabel htmlFor="switch-focus-mode" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Mode sombre
+          <div className="flex items-center gap-3 lg:justify-self-end">
+            <FieldLabel htmlFor="switch-focus-mode" className="text-sm font-medium text-muted-foreground">
+              Ambiance nuit
             </FieldLabel>
             <ThemeToggle />
           </div>
-
         </div>
       </header>
 
-      {/* --- CONTENU DYNAMIQUE --- */}
-      <main className="flex flex-1 w-full flex-col items-start p-8 mx-auto container">
-        <div className="w-full">
-          
+      <main className="flex w-full min-w-0 flex-1 flex-col items-start px-4 py-8 sm:px-6 lg:px-8 sm:py-10">
+        <div className="w-full min-w-0">
           {/* ONGLET 1 : RÉSERVATIONS */}
           {tab === "resas" && (
-            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">  
+            <div className="flex w-full min-w-0 flex-col gap-6 animate-in fade-in duration-300">  
               <Reservations_tab />
             </div>
           )}

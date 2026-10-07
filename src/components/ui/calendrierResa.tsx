@@ -120,44 +120,44 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
   });
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden shadow-sm">
+    <div className="asso-panel flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border shadow-sm">
       
       {/* BARRE DE NAVIGATION ET TITRE */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-zinc-900">
+      <div className="flex items-center justify-between border-b border-border bg-secondary/55 p-3">
         <div className="flex items-center gap-2">
           <button
             onClick={handlePreviousWeek}
-            className="p-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent/50"
           >
             ←
           </button>
           <button
             onClick={handleToday}
-            className="px-2.5 py-1 text-xs font-medium rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-extrabold text-primary transition-colors hover:bg-primary/20"
           >
             Aujourd'hui
           </button>
           <button
             onClick={handleNextWeek}
-            className="p-1.5 text-xs font-medium rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-accent/50"
           >
             →
           </button>
         </div>
-        <span className="text-sm font-semibold capitalize text-gray-800 dark:text-gray-200">
+        <span className="text-sm font-extrabold capitalize text-foreground">
           {monthLabel}
         </span>
       </div>
 
       {/* EN-TÊTE DES JOURS */}
-      <div className="flex border-b border-gray-200 dark:border-gray-800">
-        <div className="w-16 flex-shrink-0 bg-gray-50 dark:bg-zinc-900 border-r border-gray-200 dark:border-gray-800" />
+      <div className="flex border-b border-border">
+        <div className="w-16 flex-shrink-0 border-r border-border bg-secondary/35" />
         {days.map((day, i) => (
-          <div key={i} className="flex-1 text-center py-2 border-r border-gray-200 dark:border-gray-800 last:border-0 bg-gray-50 dark:bg-zinc-900">
-            <div className="text-xs font-semibold text-gray-500 uppercase">
+          <div key={i} className="calendar-day flex-1 border-r border-border py-2 text-center last:border-0">
+            <div className="text-xs font-bold uppercase text-muted-foreground">
               {day.toLocaleDateString("fr-FR", { weekday: "short" })}
             </div>
-            <div className="text-base font-bold text-gray-900 dark:text-white">
+            <div className="calendar-day-number text-base font-black text-foreground">
               {day.getDate()}
             </div>
           </div>
@@ -170,13 +170,13 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
         <div className="flex flex-1 relative w-full min-h-[600px]">
           
           {/* Colonne des heures */}
-          <div className="w-16 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 relative bg-white dark:bg-black z-10">
+          <div className="relative z-10 w-16 flex-shrink-0 border-r border-border bg-card">
             {hours.map((hour, i) => {
               const hourTopPercent = (i * 60 / TOTAL_GRID_MINUTES) * 100;
               return (
                 <div
                   key={i}
-                  className="text-xs text-gray-400 text-right pr-2 absolute w-full -translate-y-1/2"
+                  className="absolute w-full -translate-y-1/2 pr-2 text-right text-xs text-muted-foreground"
                   style={{ top: `${hourTopPercent}%` }}
                 >
                   {hour}h00
@@ -186,7 +186,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
           </div>
 
           {/* Grille des jours */}
-          <div className="flex flex-1 relative bg-white dark:bg-black">
+          <div className="relative flex flex-1 bg-card">
             
             {/* Lignes horizontales de fond */}
             <div className="absolute inset-0 pointer-events-none">
@@ -195,7 +195,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                 return (
                   <div
                     key={i}
-                    className="w-full border-b border-gray-100 dark:border-gray-800/50 absolute"
+                    className="absolute w-full border-b border-border/55"
                     style={{ top: `${lineTopPercent}%` }}
                   />
                 );
@@ -208,7 +208,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
               const positions = calculateLayout(dayEvents);
 
               return (
-                <div key={dayIndex} className="flex-1 relative border-r border-gray-200 dark:border-gray-800 last:border-0">
+                <div key={dayIndex} className="relative flex-1 border-r border-border/70 last:border-0">
                   {dayEvents.map((event) => {
                     const layout = positions[event.id] || { width: 100, left: 0 };
                     
@@ -234,7 +234,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                     return (
                       <div
                         key={event.id}
-                        className="absolute rounded-md p-1.5 text-xs text-white overflow-hidden shadow-sm transition-transform hover:scale-[1.02] hover:z-20 cursor-pointer border border-white/20"
+                        className="absolute cursor-pointer overflow-hidden rounded-lg border border-white/35 p-1.5 text-xs text-white shadow-md transition-transform hover:z-20 hover:scale-[1.02]"
                         style={{
                           top: `${topPercent}%`,
                           height: `${finalHeight}%`,

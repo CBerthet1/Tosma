@@ -15,12 +15,12 @@ export default async function Matos_tab() {
     .limit(10);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Liste du matos</h1>
+    <div className="asso-panel container mx-auto overflow-hidden rounded-2xl border p-5 sm:p-6">
+      <h1 className="mb-4 text-xl font-extrabold">Liste du matos</h1>
       
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white dark:bg-zinc-700 rounded-lg shadow">
-          <thead className="bg-gray-350 dark:bg-gray-700">
+        <table className="min-w-full overflow-hidden rounded-xl bg-card">
+          <thead className="bg-secondary/70">
             <tr>
               <th className="px-4 py-2 text-left">Nom</th>
               <th className="px-4 py-2 text-left">Catégorie</th>
@@ -28,9 +28,11 @@ export default async function Matos_tab() {
           </thead>
           <tbody>
             {matos_list.map((matos) => (
-              <tr key={matos.id} className="border-t border-gray-500 dark:border-gray-700">
+              <tr key={matos.id} className="border-t border-border">
                 <td className="px-4 py-2">{matos.name}</td>
-                <td className="px-4 py-2">{matos.categorie}</td>
+                <td className="px-4 py-2">
+                  <span className="inventory-tag inline-flex rounded-full px-3 py-1 text-xs font-bold">{matos.categorie}</span>
+                </td>
                 
   
               </tr>

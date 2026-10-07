@@ -31,8 +31,8 @@ export function BoutonAddMatos() {
   };
 
   return (
-    <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-      <form onSubmit={handleSubmit} className="space-y-6"> 
+    <div className="asso-panel w-full max-w-lg rounded-2xl border p-6">
+      <form onSubmit={handleSubmit} className="asso-form space-y-6"> 
         {/* En-tête du formulaire */}
         <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">

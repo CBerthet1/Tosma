@@ -5,8 +5,7 @@ import { resaTable } from "../../drizzle/schema";
 import { desc } from 'drizzle-orm';
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
 
-// Une palette de jolies couleurs 
-const PASTEL_COLORS =  [
+const RESERVATION_COLORS = [
   "#b08d55", // Amber (Moutarde grisée)
   "#5e7b99", // Blue (Bleu acier/denim)
   "#608a70", // Emerald (Vert sauge)
@@ -26,8 +25,8 @@ function getStringColor(str: string | number) {
   for (let i = 0; i < stringValue.length; i++) {
     hash = stringValue.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % PASTEL_COLORS.length;
-  return PASTEL_COLORS[index];
+  const index = Math.abs(hash) % RESERVATION_COLORS.length;
+  return RESERVATION_COLORS[index];
 }
 
 // Fonction pour récupérer les réservations
@@ -52,4 +51,3 @@ export default async function Reservations_tab() {
     </div>
   );
 }
-
