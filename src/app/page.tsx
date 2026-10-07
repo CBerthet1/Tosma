@@ -27,12 +27,12 @@ export default async function Home({ searchParams }: PageProps) {
   return (
     <div className="flex flex-col flex-1 min-h-screen font-sans bg-background text-foreground">
       <header className="w-full border-b border-border/80 bg-card/75 backdrop-blur-sm">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-5 py-4 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 px-5 py-3 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]">
           <div className="flex items-center gap-3 lg:justify-self-start">
             <span className="flex size-12 items-center justify-center rounded-2xl bg-slate-900 shadow-sm">
               <Image
-                src="/Logo_Hyris_B.296795f9aab355349e2b.png"
-                alt="Logo de l’association"
+                src="/logo_Hyris.png"
+                alt="Logo Hyris"
                 width={44}
                 height={48}
                 unoptimized
@@ -40,8 +40,7 @@ export default async function Home({ searchParams }: PageProps) {
               />
             </span>
             <div>
-              <h1 className="text-xl font-black tracking-tight text-foreground">Tosma</h1>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">L’asso qui fait des images</p>
+              <h1 className="text-4xl font-black tracking-tight text-foreground">Tosma</h1>
             </div>
           </div>
 
@@ -82,14 +81,14 @@ export default async function Home({ searchParams }: PageProps) {
 
           <div className="flex items-center gap-3 lg:justify-self-end">
             <FieldLabel htmlFor="switch-focus-mode" className="text-sm font-medium text-muted-foreground">
-              Ambiance nuit
+              Mode nuit
             </FieldLabel>
             <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="flex w-full min-w-0 flex-1 flex-col items-start px-4 py-8 sm:px-6 lg:px-8 sm:py-10">
+      <main className="flex w-full min-w-0 flex-1 flex-col items-start px-4 py-8 sm:px-6 lg:px-8 sm:py-3">
         <div className="w-full min-w-0">
           {/* ONGLET 1 : RÉSERVATIONS */}
           {tab === "resas" && (
