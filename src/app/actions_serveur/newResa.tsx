@@ -1,5 +1,5 @@
 'use server';
-
+import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable, resaTable, resaMatosTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
@@ -11,6 +11,12 @@ export async function newResa(
   name: string, 
   matosIds: number[] 
 ) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    throw new Error("Vous devez être connecté pour créer une réservation.");
+  }
+
   const normalizedName = name.trim();
   if (
     !normalizedName ||
@@ -44,6 +50,7 @@ export async function newResa(
       name: normalizedName,
       start: start,
       end: end,
+      user: userId,
     });
 
     const newResaId = result.insertId;

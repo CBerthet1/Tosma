@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { newResa } from "../../app/actions_serveur/newResa";
+import { CalendarPlus2, Package, Search, X } from "lucide-react";
 
 // Génère les créneaux horaires
 const generateTimeSlots = () => {
@@ -88,15 +89,20 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   };
 
   return (
-    <div className="asso-panel w-full max-w-lg rounded-2xl border p-6">
-      <form onSubmit={handleSubmit} className="asso-form space-y-6"> 
-        <div className="border-b border-slate-100 pb-4 dark:border-slate-800">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Nouvelle réservation
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Remplissez les détails ci-dessous pour enregistrer la réservation.
-          </p>
+    <div className="asso-panel h-full w-full rounded-2xl border p-5 sm:p-6">
+      <form onSubmit={handleSubmit} className="asso-form flex h-full flex-col space-y-6">
+        <div className="flex items-start gap-3 border-b pb-5">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <CalendarPlus2 className="size-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">
+              Nouvelle réservation
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Planifiez un créneau et choisissez le matériel dont vous avez besoin.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -104,7 +110,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
           <div className="space-y-1.5">
             <label 
               htmlFor="res-title" 
-              className="text-sm font-medium text-slate-700 dark:text-slate-300"
+              className="text-sm font-semibold"
             >
               Intitulé de la réservation
             </label>
@@ -116,7 +122,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
               maxLength={63}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
 
@@ -125,7 +131,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             <div className="space-y-1.5">
               <label 
                 htmlFor="res-start-date" 
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="text-sm font-semibold"
               >
                 Début
               </label>
@@ -135,12 +141,12 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 required
-                className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-slate-300"
+                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
               <select
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:text-slate-100 dark:bg-slate-950"
+                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               >
                 {TIME_SLOTS.map((slot) => (
                   <option key={`start-${slot}`} value={slot}>{slot}</option>
@@ -151,7 +157,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             <div className="space-y-1.5">
               <label 
                 htmlFor="res-end-date" 
-                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                className="text-sm font-semibold"
               >
                 Fin
               </label>
@@ -162,12 +168,12 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 required
-                className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-slate-300"
+                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
               <select
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:text-slate-100 dark:bg-slate-950"
+                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               >
                 {TIME_SLOTS.map((slot) => (
                   <option key={`end-${slot}`} value={slot}>{slot}</option>
@@ -177,12 +183,11 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
           </div>
 
           {/* 4. Sélection du matériel avec champ de recherche */}
-          <div className="space-y-1.5 pt-2 relative">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <div className="relative space-y-2 pt-1">
+            <label className="flex items-center gap-2 text-sm font-semibold">
+              <Package className="size-4 text-primary" aria-hidden="true" />
               Matériel à réserver
             </label>
-            
-            
 
             {/* Champ de saisie pour la recherche */}
             <input
@@ -193,8 +198,9 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
               onFocus={() => setIsFocused(true)}
               // Un léger délai sur le blur permet de cliquer sur un résultat avant qu'il ne disparaisse
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full rounded-xl border border-input bg-background px-3 py-2.5 pl-9 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             />
+            <Search className="pointer-events-none absolute left-3 top-[2.65rem] size-4 text-muted-foreground" aria-hidden="true" />
 
             {/* Liste déroulante des suggestions (visible seulement quand on cherche) */}
             {isFocused && searchQuery.length > 0 && (
@@ -204,7 +210,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                     <div
                       key={item.id}
                       onClick={() => handleAddMatos(item.id)}
-                      className="cursor-pointer rounded-md px-3 py-2 text-sm text-foreground hover:bg-primary/10"
+                        className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/10"
                     >
                       {item.name ?? "Matériel sans nom"}
                     </div>
@@ -225,15 +231,16 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                 {selectedMatos.map((item) => (
                   <span 
                     key={item.id} 
-                    className="asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                    className="asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
                   >
                     {item.name}
                     <button
                       type="button"
                       onClick={() => handleRemoveMatos(item.id)}
-                      className="text-slate-400 hover:text-red-500 focus:outline-none"
+                      aria-label={`Retirer ${item.name ?? "ce matériel"}`}
+                      className="rounded-full text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
-                      &times;
+                      <X className="size-3.5" aria-hidden="true" />
                     </button>
                   </span>
                 ))}
@@ -241,17 +248,17 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             )}
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 border-t border-border/70 pt-5">
           <button
             type="button"
-            className="rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900"
+            className="rounded-xl border border-input px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+            className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
           >
             {loading ? "Création en cours..." : "Créer la réservation"}
           </button>

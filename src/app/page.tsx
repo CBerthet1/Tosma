@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
+import MesReservations_tab from "@/app/actions_serveur/MesReservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
 import { logout } from "@/app/actions_serveur/logout";
 import { categoryTable, matosTable } from "../drizzle/schema";
@@ -66,14 +67,14 @@ export default async function Home({ searchParams }: PageProps) {
               Le planning
             </Link>
             <Link
-              href="/?tab=Nouvelle-Réservation"
+              href="/?tab=reservations"
               className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
-                tab === "Nouvelle-Réservation"
+                tab === "reservations" || tab === "Nouvelle-Réservation" || tab === "mes-reservations"
                   ? "bg-primary/12 text-primary shadow-sm"
                   : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
               }`}
             >
-              Réserver
+              Réservations
             </Link>
             {isAdmin && (
             <Link
@@ -121,9 +122,10 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
           )}
 
-          {/* ONGLET 3 : Rajouter Resa */}
-          {tab === "Nouvelle-Réservation" && (
-            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+          {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
+          {(tab === "reservations" || tab === "Nouvelle-Réservation" || tab === "mes-reservations") && (
+            <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
+              <MesReservations_tab matosList={allMatos} />
               <BoutonAddResa matosList={allMatos} />
             </div>
           )}
