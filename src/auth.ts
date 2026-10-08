@@ -33,14 +33,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials?.username || !credentials?.password) {
           return null;
         }
-        if (credentials.username === "gg" && credentials.password === "t") {
+        if (
+          process.env.NODE_ENV !== "production" &&
+          credentials.username === "gg" &&
+          credentials.password === "t"
+        ) {
           return {
             id: credentials.username as string, // Identifiant unique obligatoire pour NextAuth
             name: "arrete_de_lire_les_fichiers",
             groups: ["geek", "user"] 
           };
         }
-        if (credentials.username === "gt" && credentials.password === "t") {
+        if (
+          process.env.NODE_ENV !== "production" &&
+          credentials.username === "gt" &&
+          credentials.password === "t"
+        ) {
           return {
             id: credentials.username as string, // Identifiant unique obligatoire pour NextAuth
             name: "espèce de bot",

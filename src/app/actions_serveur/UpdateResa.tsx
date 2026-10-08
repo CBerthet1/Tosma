@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable, resaMatosTable, resaTable } from "../../drizzle/schema";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function updateResa(
@@ -49,12 +49,53 @@ export async function updateResa(
 
     if (matosIds.length > 0) {
       const existingMatos = await tx
-        .select({ id: matosTable.id })
+        .select({
+          id: matosTable.id,
+          available: matosTable.available,
+          quantity: matosTable.quantity,
+        })
         .from(matosTable)
         .where(inArray(matosTable.id, matosIds));
 
       if (existingMatos.length !== matosIds.length) {
         throw new Error("Un des matériels sélectionnés n'existe plus.");
+      }
+
+      if (existingMatos.some((matos) => !matos.available)) {
+        throw new Error("Un des matériels sélectionnés n'est pas disponible.");
+      }
+
+      const overlappingReservations = await tx
+        .select({
+          matosId: resaMatosTable.matosId,
+          quantity: resaMatosTable.quantity,
+        })
+        .from(resaMatosTable)
+        .innerJoin(resaTable, eq(resaMatosTable.resaId, resaTable.id))
+        .where(
+          and(
+            inArray(resaMatosTable.matosId, matosIds),
+            lt(resaTable.start, end),
+            gt(resaTable.end, start),
+            ne(resaTable.id, id),
+          ),
+        );
+
+      const reservedByMatos = new Map<number, number>();
+      for (const reservation of overlappingReservations) {
+        reservedByMatos.set(
+          reservation.matosId,
+          (reservedByMatos.get(reservation.matosId) ?? 0) + reservation.quantity,
+        );
+      }
+
+      if (
+        existingMatos.some(
+          (matos) =>
+            (reservedByMatos.get(matos.id) ?? 0) >= matos.quantity,
+        )
+      ) {
+        throw new Error("Un des matériels sélectionnés n'est pas disponible à cet horaire.");
       }
     }
 
