@@ -1,8 +1,9 @@
 'use server'; // Ce composant est côté serveur
 
 import { db } from "../../drizzle/db";
-import { resaTable } from "../../drizzle/schema";
+import { matosTable, resaMatosTable, resaTable } from "../../drizzle/schema";
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
+import { eq } from "drizzle-orm";
 
 const RESERVATION_COLORS = [
   "#b08d55", // Amber (Moutarde grisée)
@@ -34,18 +35,32 @@ export default async function Reservations_tab() {
   const reservations = await db.select()
     .from(resaTable);
 
+  const reservationMatos = await db.select({
+    resaId: resaMatosTable.resaId,
+    name: matosTable.name,
+  })
+    .from(resaMatosTable)
+    .innerJoin(matosTable, eq(resaMatosTable.matosId, matosTable.id));
+
+  const matosByReservation = new Map<number, string[]>();
+  for (const matos of reservationMatos) {
+    const names = matosByReservation.get(matos.resaId) ?? [];
+    names.push(matos.name ?? "Matériel sans nom");
+    matosByReservation.set(matos.resaId, names);
+  }
+
   const calendarEvents: Reservation[] = reservations.map((resa) => ({
     id: resa.id,
     title: resa.name ?? "Réservation sans nom",
     start: new Date(resa.start),
     end: new Date(resa.end),
+    matos: matosByReservation.get(resa.id) ?? [],
     color: getStringColor(resa.id),
   }));
   
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Un header pour changer de semaine pourrait aller ici plus tard */}
       <CalendrierResa reservations={calendarEvents} />
     </div>
   );

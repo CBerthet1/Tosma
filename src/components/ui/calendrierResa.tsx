@@ -8,6 +8,7 @@ export type Reservation = {
   title: string;
   start: Date;
   end: Date;
+  matos: string[];
   color?: string;
 };
 
@@ -245,9 +246,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                       >
                         <div className="font-bold truncate">{event.title}</div>
                         <div className="opacity-90 truncate text-[10px] mt-0.5">
-                          {startDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {startDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                          <br/>
-                          {endDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })} à {endDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                          Matos : {event.matos.join(", ") || "Aucun"}
                         </div>
                       </div>
                     );
