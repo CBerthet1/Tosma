@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from "react";
-import { newResa } from "../../app/actions_serveur/newResa";
+import { useEffect, useState } from "react";
+import { getUnavailableMatosIds, newResa } from "../../app/actions_serveur/newResa";
 import { CalendarPlus2, Package, Search, X } from "lucide-react";
 
 // Génère les créneaux horaires
@@ -40,12 +40,72 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   
   // 1. État pour suivre les équipements sélectionnés
   const [selectedMatosIds, setSelectedMatosIds] = useState<number[]>([]);
+  const [availabilityResult, setAvailabilityResult] = useState<{
+    key: string;
+    unavailableIds: number[];
+    error?: string;
+  } | null>(null);
   
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
+
+  const start = startDate ? new Date(`${startDate}T${startTime}`) : null;
+  const end = endDate ? new Date(`${endDate}T${endTime}`) : null;
+  const hasValidDateRange = Boolean(
+    start &&
+      end &&
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      start < end,
+  );
+  const availabilityKey = `${startDate}T${startTime}/${endDate}T${endTime}`;
+  const hasCurrentAvailability = availabilityResult?.key === availabilityKey;
+  const unavailableMatosIds =
+    hasValidDateRange && hasCurrentAvailability ? availabilityResult?.unavailableIds ?? [] : [];
+  const checkingAvailability = hasValidDateRange && !hasCurrentAvailability;
+  const availabilityError =
+    hasCurrentAvailability ? availabilityResult?.error ?? "" : "";
+  const unavailableSelectedMatos = selectedMatosIds.some((id) => unavailableMatosIds.includes(id));
+
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+    const availabilityStart = new Date(`${startDate}T${startTime}`);
+    const availabilityEnd = new Date(`${endDate}T${endTime}`);
+    if (
+      Number.isNaN(availabilityStart.getTime()) ||
+      Number.isNaN(availabilityEnd.getTime()) ||
+      availabilityStart >= availabilityEnd
+    ) return;
+
+    let cancelled = false;
+    const key = `${startDate}T${startTime}/${endDate}T${endTime}`;
+
+    getUnavailableMatosIds(availabilityStart, availabilityEnd)
+      .then((ids) => {
+        if (!cancelled) {
+          setAvailabilityResult({ key, unavailableIds: ids });
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setAvailabilityResult({
+            key,
+            unavailableIds: [],
+            error:
+              error instanceof Error
+                ? error.message
+                : "La disponibilité du matériel n'a pas pu être vérifiée.",
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [startDate, startTime, endDate, endTime]);
 
   // 2. Déduction des listes (ceux déjà sélectionnés VS ceux qu'on peut chercher)
   const selectedMatos = matosList.filter((m) => selectedMatosIds.includes(m.id));
@@ -208,21 +268,50 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             {isFocused && searchQuery.length > 0 && (
               <div className="asso-options absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
                 {availableMatos.length > 0 ? (
-                  availableMatos.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleAddMatos(item.id)}
-                        className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-primary/10"
-                    >
-                      {item.name ?? "Matériel sans nom"}
-                    </div>
-                  ))
+                  availableMatos.map((item) => {
+                    const isUnavailable = unavailableMatosIds.includes(item.id);
+                    const isDisabled =
+                      isUnavailable ||
+                      checkingAvailability ||
+                      Boolean(availabilityError) ||
+                      !hasValidDateRange;
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => handleAddMatos(item.id)}
+                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                          isDisabled
+                            ? "cursor-not-allowed text-muted-foreground opacity-60"
+                            : "cursor-pointer text-foreground hover:bg-primary/10"
+                        }`}
+                      >
+                        {item.name ?? "Matériel sans nom"}
+                        {isUnavailable ? (
+                          <span className="ml-2 text-xs">(non disponible à cet horaire)</span>
+                        ) : null}
+                      </button>
+                    );
+                  })
                 ) : (
                   <div className="px-3 py-2 text-sm text-muted-foreground">
                     Aucun résultat trouvé.
                   </div>
                 )}
               </div>
+            )}
+            {checkingAvailability && (
+              <p className="text-xs text-muted-foreground">Vérification de la disponibilité…</p>
+            )}
+            {!checkingAvailability && !hasValidDateRange && (
+              <p className="text-xs text-muted-foreground">
+                Choisissez un créneau valide pour vérifier la disponibilité.
+              </p>
+            )}
+            {availabilityError && (
+              <p role="alert" className="text-xs text-destructive">{availabilityError}</p>
             )}
           </div>
         </div> {/* <-- Il manquait la fermeture de la div globale "space-y-4" ici */}
@@ -233,9 +322,14 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                 {selectedMatos.map((item) => (
                   <span 
                     key={item.id} 
-                    className="asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                    className={`asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      unavailableMatosIds.includes(item.id) ? "text-muted-foreground opacity-60" : ""
+                    }`}
                   >
                     {item.name}
+                    {unavailableMatosIds.includes(item.id) && (
+                      <span>(non disponible à cet horaire)</span>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleRemoveMatos(item.id)}
@@ -264,7 +358,11 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={
+              loading ||
+              (selectedMatosIds.length > 0 &&
+                (checkingAvailability || Boolean(availabilityError) || unavailableSelectedMatos))
+            }
             className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
           >
             {loading ? "Création en cours..." : "Créer la réservation"}
