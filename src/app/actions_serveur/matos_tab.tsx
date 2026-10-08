@@ -17,8 +17,7 @@ export default async function Matos_tab() {
   })
     .from(matosTable)
     .leftJoin(categoryTable, eq(matosTable.categoryId, categoryTable.id))
-    .orderBy(desc(matosTable.id))
-    .limit(10);
+    .orderBy(desc(matosTable.id));
 
   return (
     <div className="asso-panel container mx-auto overflow-hidden rounded-2xl border p-5 sm:p-6">
