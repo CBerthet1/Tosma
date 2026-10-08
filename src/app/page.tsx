@@ -3,12 +3,15 @@ import { auth } from "@/auth";
 import { db } from "../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
+import { logout } from "@/app/actions_serveur/logout";
 import { categoryTable, matosTable } from "../drizzle/schema";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
+import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/switch-theme";
 import { FieldLabel } from "@/components/ui/field";
 import Image from "next/image";
+import { LogOut } from "lucide-react";
 
 // On type les searchParams pour l'URL
 type PageProps = {
@@ -91,6 +94,12 @@ export default async function Home({ searchParams }: PageProps) {
               Mode nuit
             </FieldLabel>
             <ThemeToggle />
+            <form action={logout}>
+              <Button type="submit" variant="outline" className="gap-2">
+                <LogOut aria-hidden="true" />
+                Déconnexion
+              </Button>
+            </form>
           </div>
         </div>
       </header>
