@@ -20,45 +20,42 @@ export default async function MesReservations_tab({
   }
 
   const now = new Date();
-  const reservations = await db
+  const rows = await db
     .select({
       id: resaTable.id,
       name: resaTable.name,
       start: resaTable.start,
       end: resaTable.end,
       userId: resaTable.user,
-    })
-    .from(resaTable)
-    .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
-
-  const reservationMatos = await db
-    .select({
-      resaId: resaMatosTable.resaId,
       matosId: resaMatosTable.matosId,
     })
-    .from(resaMatosTable)
-    .innerJoin(resaTable, eq(resaMatosTable.resaId, resaTable.id))
+    .from(resaTable)
+    .leftJoin(resaMatosTable, eq(resaTable.id, resaMatosTable.resaId))
     .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
 
-  const matosByReservation = new Map<number, number[]>();
-  for (const item of reservationMatos) {
-    const selected = matosByReservation.get(item.resaId) ?? [];
-    selected.push(item.matosId);
-    matosByReservation.set(item.resaId, selected);
-  }
+  const reservationsById = new Map<number, ReservationToEdit>();
+  for (const row of rows) {
+    let reservation = reservationsById.get(row.id);
+    if (!reservation) {
+      reservation = {
+        id: row.id,
+        name: row.name ?? "",
+        start: row.start,
+        end: row.end,
+        matosIds: [],
+        userId: row.userId,
+      };
+      reservationsById.set(row.id, reservation);
+    }
 
-  const editableReservations: ReservationToEdit[] = reservations.map((reservation) => ({
-    id: reservation.id,
-    name: reservation.name ?? "",
-    start: reservation.start,
-    end: reservation.end,
-    matosIds: matosByReservation.get(reservation.id) ?? [],
-    userId: reservation.userId,
-  }));
+    if (row.matosId !== null) {
+      reservation.matosIds.push(row.matosId);
+    }
+  }
 
   return (
     <MesReservations
-      reservations={editableReservations}
+      reservations={[...reservationsById.values()]}
       matosList={matosList}
       currentUserId={session.user.id}
     />

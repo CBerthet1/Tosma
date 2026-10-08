@@ -31,37 +31,42 @@ function getStringColor(str: string | number) {
 
 // Fonction pour récupérer les réservations
 export default async function Reservations_tab() {
-  // Récupérer les 10 dernières réservations
-  const reservations = await db.select()
-    .from(resaTable);
+  const rows = await db
+    .select({
+      id: resaTable.id,
+      title: resaTable.name,
+      start: resaTable.start,
+      end: resaTable.end,
+      matosId: resaMatosTable.matosId,
+      matosName: matosTable.name,
+    })
+    .from(resaTable)
+    .leftJoin(resaMatosTable, eq(resaTable.id, resaMatosTable.resaId))
+    .leftJoin(matosTable, eq(resaMatosTable.matosId, matosTable.id));
 
-  const reservationMatos = await db.select({
-    resaId: resaMatosTable.resaId,
-    name: matosTable.name,
-  })
-    .from(resaMatosTable)
-    .innerJoin(matosTable, eq(resaMatosTable.matosId, matosTable.id));
+  const eventsById = new Map<number, Reservation>();
+  for (const row of rows) {
+    let event = eventsById.get(row.id);
+    if (!event) {
+      event = {
+        id: row.id,
+        title: row.title ?? "Réservation sans nom",
+        start: new Date(row.start),
+        end: new Date(row.end),
+        matos: [],
+        color: getStringColor(row.id),
+      };
+      eventsById.set(row.id, event);
+    }
 
-  const matosByReservation = new Map<number, string[]>();
-  for (const matos of reservationMatos) {
-    const names = matosByReservation.get(matos.resaId) ?? [];
-    names.push(matos.name ?? "Matériel sans nom");
-    matosByReservation.set(matos.resaId, names);
+    if (row.matosId !== null) {
+      event.matos.push(row.matosName ?? "Matériel sans nom");
+    }
   }
-
-  const calendarEvents: Reservation[] = reservations.map((resa) => ({
-    id: resa.id,
-    title: resa.name ?? "Réservation sans nom",
-    start: new Date(resa.start),
-    end: new Date(resa.end),
-    matos: matosByReservation.get(resa.id) ?? [],
-    color: getStringColor(resa.id),
-  }));
-  
 
   return (
     <div className="w-full h-full flex flex-col">
-      <CalendrierResa reservations={calendarEvents} />
+      <CalendrierResa reservations={[...eventsById.values()]} />
     </div>
   );
 }

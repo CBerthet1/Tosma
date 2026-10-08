@@ -21,19 +21,30 @@ type PageProps = {
 
 // Ne pas oublier "async" puisque searchParams est une Promise dans Next.js
 export default async function Home({ searchParams }: PageProps) {
-  // On récupère l'onglet actif (par défaut : resas)
-  const { tab = "resas" } = await searchParams;
-  const allMatos = await db.select({
-    id: matosTable.id,
-    name: matosTable.name,
-  }).from(matosTable);
-  const categories = await db.select({
-    id: categoryTable.id,
-    name: categoryTable.name,
-  }).from(categoryTable);
-  const session = await auth();
+  const [{ tab = "resas" }, session] = await Promise.all([
+    searchParams,
+    auth(),
+  ]);
 
-  const isAdmin = session?.user?.groups?.includes("geek");
+  const isAdmin = Boolean(session?.user?.groups?.includes("geek"));
+  const showReservations =
+    tab === "reservations" ||
+    tab === "Nouvelle-Réservation" ||
+    tab === "mes-reservations";
+  const [allMatos, categories] = await Promise.all([
+    showReservations
+      ? db.select({
+          id: matosTable.id,
+          name: matosTable.name,
+        }).from(matosTable)
+      : Promise.resolve([]),
+    isAdmin && tab === "matos"
+      ? db.select({
+          id: categoryTable.id,
+          name: categoryTable.name,
+        }).from(categoryTable)
+      : Promise.resolve([]),
+  ]);
 
   return (
     <div className="flex flex-col flex-1 min-h-screen font-sans bg-background text-foreground">
@@ -123,7 +134,7 @@ export default async function Home({ searchParams }: PageProps) {
           )}
 
           {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
-          {(tab === "reservations" || tab === "Nouvelle-Réservation" || tab === "mes-reservations") && (
+          {showReservations && (
             <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
               <MesReservations_tab matosList={allMatos} />
               <BoutonAddResa matosList={allMatos} />
