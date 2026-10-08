@@ -6,10 +6,15 @@ import {newMatos} from "../../app/actions_serveur/newMatos";
 
 import { useState } from "react";
 
-export function BoutonAddMatos() {
+type Category = {
+  id: number;
+  name: string;
+};
+
+export function BoutonAddMatos({ categories }: { categories: Category[] }) {
  
   const [name, setName] = useState("");
-  const [categorie, setCategorie] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [loading, setLoading] = useState(false); // gère l'état de chargement du bouton quand on soumet le formulaire
 
 
@@ -18,11 +23,11 @@ export function BoutonAddMatos() {
       
 
       // Envoi vers le serveur
-      await newMatos( name, categorie);
+      await newMatos(name, Number(categoryId));
 
       // Remise à zéro des champs
       setName("");
-      setCategorie("");
+      setCategoryId("");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
     } finally {
@@ -55,6 +60,7 @@ export function BoutonAddMatos() {
               type="text"
               placeholder="ex: A360"
               value={name}
+              maxLength={255}
               onChange={(e) => setName(e.target.value)}
               required
               className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
@@ -74,16 +80,15 @@ export function BoutonAddMatos() {
             </label>
             <select
               id="res-category"
-              value={categorie}
-              onChange={(e) => setCategorie(e.target.value)}
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
               required
               className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300 appearance-none"
             >
               <option value="" disabled>Sélectionnez une option</option>
-              <option value="caméra">Caméra</option>
-              <option value="objo">Objo</option>
-              <option value="rej">Rej</option>
-              <option value="light">Light</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
             </select>
           </div>
         </div>

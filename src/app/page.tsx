@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { db } from "../drizzle/db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
-import { matosTable } from "../drizzle/schema";
+import { categoryTable, matosTable } from "../drizzle/schema";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 import { ThemeToggle } from "@/components/ui/switch-theme";
@@ -19,7 +19,14 @@ type PageProps = {
 export default async function Home({ searchParams }: PageProps) {
   // On récupère l'onglet actif (par défaut : resas)
   const { tab = "resas" } = await searchParams;
-  const allMatos = await db.select().from(matosTable);
+  const allMatos = await db.select({
+    id: matosTable.id,
+    name: matosTable.name,
+  }).from(matosTable);
+  const categories = await db.select({
+    id: categoryTable.id,
+    name: categoryTable.name,
+  }).from(categoryTable);
   const session = await auth();
 
   const isAdmin = session?.user?.groups?.includes("geek");
@@ -100,7 +107,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET 2 : MATÉRIEL */}
           {tab === "matos" && isAdmin && (
             <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-              <BoutonAddMatos />
+              <BoutonAddMatos categories={categories} />
               <Matos_tab />
             </div>
           )}

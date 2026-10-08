@@ -2,7 +2,6 @@
 
 import { db } from "../../drizzle/db";
 import { resaTable } from "../../drizzle/schema";
-import { desc } from 'drizzle-orm';
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
 
 const RESERVATION_COLORS = [
@@ -37,7 +36,7 @@ export default async function Reservations_tab() {
 
   const calendarEvents: Reservation[] = reservations.map((resa) => ({
     id: resa.id,
-    title: `${resa.name}`, 
+    title: resa.name ?? "Réservation sans nom",
     start: new Date(resa.start),
     end: new Date(resa.end),
     color: getStringColor(resa.id),

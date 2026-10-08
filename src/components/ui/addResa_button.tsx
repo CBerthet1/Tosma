@@ -21,7 +21,7 @@ const TIME_SLOTS = generateTimeSlots();
 // Type pour le matériel reçu en props
 type Matos = {
   id: number;
-  name: string;
+  name: string | null;
 };
 
 interface BoutonAddResaProps {
@@ -50,7 +50,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   const availableMatos = matosList.filter(
     (m) =>
       !selectedMatosIds.includes(m.id) &&
-      m.name.toLowerCase().includes(searchQuery.toLowerCase())
+      (m.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   // 3. Fonctions pour ajouter/retirer un tag
@@ -113,6 +113,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
               type="text"
               placeholder="ex: Tournage Papillon"
               value={name}
+              maxLength={63}
               onChange={(e) => setName(e.target.value)}
               required
               className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
@@ -205,7 +206,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
                       onClick={() => handleAddMatos(item.id)}
                       className="cursor-pointer rounded-md px-3 py-2 text-sm text-foreground hover:bg-primary/10"
                     >
-                      {item.name}
+                      {item.name ?? "Matériel sans nom"}
                     </div>
                   ))
                 ) : (

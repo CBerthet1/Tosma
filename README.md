@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Connexion à la base existante
+
+La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `session` et `image`.
+
+La table `materiel` stocke un identifiant `category_id`. Exécutez une fois `scripts/create-category-table.sql` sur la base cible pour créer et initialiser la table `category` utilisée par le formulaire. Ce script ne modifie pas les tables existantes.
+
+Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.
+
+## Connexion à la base existante
+
+La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `session` et `image`.
+
+La table `materiel` stocke un identifiant `category_id`. Exécutez une fois `scripts/create-category-table.sql` sur la base cible pour créer et initialiser la table `category` utilisée par le formulaire. Ce script ne modifie pas les tables existantes.
+
+Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.
