@@ -11,6 +11,7 @@ export type ReservationToEdit = {
   start: Date;
   end: Date;
   matosIds: number[];
+  userId: string | null;
 };
 
 type MatosOption = {
@@ -21,6 +22,7 @@ type MatosOption = {
 type MesReservationsProps = {
   reservations: ReservationToEdit[];
   matosList: MatosOption[];
+  currentUserId: string;
 };
 
 function toLocalDateTimeParts(date: Date) {
@@ -34,6 +36,7 @@ function toLocalDateTimeParts(date: Date) {
 export default function MesReservations({
   reservations,
   matosList,
+  currentUserId,
 }: MesReservationsProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -80,9 +83,9 @@ export default function MesReservations({
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Mes réservations</h2>
+            <h2 className="text-lg font-bold tracking-tight">Réservations</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Retrouvez et modifiez vos réservations.
+              Tout le monde peut les voir ; seul leur créateur peut les modifier.
             </p>
           </div>
         </div>
@@ -105,9 +108,9 @@ export default function MesReservations({
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Mes réservations</h2>
+            <h2 className="text-lg font-bold tracking-tight">Réservations</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Retrouvez et modifiez vos réservations.
+              Tout le monde peut les voir ; seul leur créateur peut les modifier.
             </p>
           </div>
         </div>
@@ -122,6 +125,7 @@ export default function MesReservations({
           const end = toLocalDateTimeParts(reservation.end);
           const isEditing = editingId === reservation.id;
           const isLoading = loadingId === reservation.id;
+          const canEdit = reservation.userId === currentUserId;
 
           return (
             <article
@@ -289,21 +293,27 @@ export default function MesReservations({
                         <span>{start.date} à {start.time} – {end.date} à {end.time}</span>
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 gap-1.5"
-                      onClick={() => {
-                        setSelectedMatosIds(reservation.matosIds);
-                        setSearchQuery("");
-                        setEditingId(reservation.id);
-                        setError("");
-                      }}
-                    >
-                      <PencilLine className="size-3.5" aria-hidden="true" />
-                      Modifier
-                    </Button>
+                    {canEdit ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 gap-1.5"
+                        onClick={() => {
+                          setSelectedMatosIds(reservation.matosIds);
+                          setSearchQuery("");
+                          setEditingId(reservation.id);
+                          setError("");
+                        }}
+                      >
+                        <PencilLine className="size-3.5" aria-hidden="true" />
+                        Modifier
+                      </Button>
+                    ) : (
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        Non modifiable
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-start gap-2 border-t border-border/60 pt-3 text-sm">
                     <Package className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />

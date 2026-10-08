@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { resaMatosTable, resaTable } from "../../drizzle/schema";
-import { eq, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
 
 type MatosOption = {
@@ -26,9 +26,10 @@ export default async function MesReservations_tab({
       name: resaTable.name,
       start: resaTable.start,
       end: resaTable.end,
+      userId: resaTable.user,
     })
     .from(resaTable)
-    .where(gt(resaTable.end, now));
+    .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
 
   const reservationMatos = await db
     .select({
@@ -37,7 +38,7 @@ export default async function MesReservations_tab({
     })
     .from(resaMatosTable)
     .innerJoin(resaTable, eq(resaMatosTable.resaId, resaTable.id))
-    .where(gt(resaTable.end, now));
+    .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
 
   const matosByReservation = new Map<number, number[]>();
   for (const item of reservationMatos) {
@@ -52,12 +53,14 @@ export default async function MesReservations_tab({
     start: reservation.start,
     end: reservation.end,
     matosIds: matosByReservation.get(reservation.id) ?? [],
+    userId: reservation.userId,
   }));
 
   return (
     <MesReservations
       reservations={editableReservations}
       matosList={matosList}
+      currentUserId={session.user.id}
     />
   );
 }

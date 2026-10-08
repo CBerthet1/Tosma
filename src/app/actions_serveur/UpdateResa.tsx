@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable, resaMatosTable, resaTable } from "../../drizzle/schema";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function updateResa(
@@ -14,7 +14,8 @@ export async function updateResa(
   matosIds: number[],
 ) {
   const session = await auth();
-  if (!session?.user) {
+  const userId = session?.user?.id;
+  if (!userId) {
     throw new Error("Vous devez être connecté pour modifier une réservation.");
   }
 
@@ -38,12 +39,12 @@ export async function updateResa(
 
   await db.transaction(async (tx) => {
     const [reservation] = await tx
-      .select({ id: resaTable.id })
+      .select({ id: resaTable.id, userId: resaTable.user })
       .from(resaTable)
       .where(eq(resaTable.id, id));
 
-    if (!reservation) {
-      throw new Error("Cette réservation n'existe pas.");
+    if (!reservation || reservation.userId !== userId) {
+      throw new Error("Vous ne pouvez modifier que les réservations que vous avez créées.");
     }
 
     if (matosIds.length > 0) {
@@ -60,7 +61,7 @@ export async function updateResa(
     await tx
       .update(resaTable)
       .set({ name: normalizedName, start, end })
-      .where(eq(resaTable.id, id));
+      .where(and(eq(resaTable.id, id), eq(resaTable.user, userId)));
     await tx.delete(resaMatosTable).where(eq(resaMatosTable.resaId, id));
 
     if (matosIds.length > 0) {

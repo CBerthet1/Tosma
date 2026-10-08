@@ -11,10 +11,9 @@ export async function newResa(
   name: string, 
   matosIds: number[] 
 ) {
-  const session = await auth();
-  const userId = session?.user?.id;
+  const userId = (await auth())?.user?.id;
   if (!userId) {
-    throw new Error("Vous devez être connecté pour créer une réservation.");
+    throw new Error("Votre session ne permet pas d'identifier le créateur de la réservation.");
   }
 
   const normalizedName = name.trim();

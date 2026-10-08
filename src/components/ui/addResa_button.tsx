@@ -42,6 +42,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   const [selectedMatosIds, setSelectedMatosIds] = useState<number[]>([]);
   
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
@@ -67,6 +68,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
 
     try {
       // 2. Fusion exacte de la date et de l'heure
@@ -82,7 +84,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
       setEndDate("");
       setSelectedMatosIds([]);
     } catch (error) {
-      console.error("Erreur lors de la réservation :", error);
+      setErrorMessage(error instanceof Error ? error.message : "La réservation n'a pas pu être créée.");
     } finally {
       setLoading(false);
     }
@@ -248,6 +250,11 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             )}
 
         {/* Actions */}
+        {errorMessage && (
+          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errorMessage}
+          </p>
+        )}
         <div className="flex items-center justify-end gap-3 border-t border-border/70 pt-5">
           <button
             type="button"

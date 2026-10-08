@@ -245,7 +245,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                         }}
                       >
                         <div className="font-bold truncate">{event.title}</div>
-                        <div className="opacity-90 truncate text-[10px] mt-0.5">
+                        <div className="mt-0.5 whitespace-normal break-words text-[10px] opacity-90">
                           Matos : {event.matos.join(", ") || "Aucun"}
                         </div>
                       </div>

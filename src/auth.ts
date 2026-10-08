@@ -8,9 +8,14 @@ declare module "next-auth" {
   interface User {
     groups?: string[]
   }
+
+  interface Session {
+    user: {
+      id: string
+      groups?: string[]
+    } & DefaultSession["user"]
+  }
 }
-
-
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -80,8 +85,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       // On transfère les groupes du token crypté vers l'objet session lisible
       if (session.user) {
-        // @ts-ignore (TypeScript peut râler car 'groups' n'est pas standard)
-        session.user.groups = token.groups;
+        if (token.sub) {
+          session.user.id = token.sub;
+        }
+        session.user.groups = Array.isArray(token.groups)
+          ? token.groups.filter((group): group is string => typeof group === "string")
+          : undefined;
       }
       return session;
     }
