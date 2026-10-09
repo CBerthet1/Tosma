@@ -51,23 +51,20 @@ export async function authenticateWithLDAP(username: string, password: string) {
 
     const user = searchEntries[0];
 
-    // 2. Recherche des groupes POSIX associés à cet utilisateur
+    // 2. Recherche RESTREINTE aux objets de type posixGroup
     const { searchEntries: groupEntries } = await client.search('dc=hyris,dc=tv', {
-      filter: `(|(memberUid=${safeUsername})(gidNumber=${user.gidNumber}))`,
+      filter: `(&(objectClass=posixGroup)(|(memberUid=${safeUsername})(gidNumber=${user.gidNumber})))`,
       scope: 'sub',
       attributes: ['cn', 'gidNumber'],
     });
 
-    // 3. Normalisation et conversion explicite en string
+    // 3. Extraction propre des noms de groupes
     user.groups = groupEntries.map(entry => {
       const cn = entry.cn;
-      if (Array.isArray(cn)) {
-        return String(cn[0]);
-      }
-      return String(cn);
+      return Array.isArray(cn) ? String(cn[0]) : String(cn);
     });
 
-    
+        
 
     console.log("Étape 4 : Utilisateur trouvé ! Son chemin exact (DN) est :", user.dn);
     console.log("Groupes récupérés pour l'utilisateur :", user.groups);
