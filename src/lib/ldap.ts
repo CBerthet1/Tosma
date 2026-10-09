@@ -80,7 +80,7 @@ export async function authenticateWithLDAP(username: string, password: string) {
     
     return {
       name: user.displayName as string,
-      groups: (user.MemberOf || user.memberOf || []) as string[], 
+      groups: (user.groups as string[]),
     };
 
   } catch (error) {
