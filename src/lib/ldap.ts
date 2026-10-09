@@ -36,10 +36,12 @@ export async function authenticateWithLDAP(username: string, password: string) {
     const safeUsername = escapeLDAPFilter(username.trim());
 
     console.log("Étape 2 : Service connecté. Recherche de l'utilisateur :", safeUsername);
+
+    // 1. Recherche de l'utilisateur
     const { searchEntries } = await client.search('dc=hyris,dc=tv', { 
       filter: `(uid=${safeUsername})`, 
       scope: 'sub',
-      attributes: ['dn', 'displayName', 'MemberOf', 'memberOf'],
+      attributes: ['dn', 'displayName', 'uid', 'gidNumber'],
     });
 
     if (searchEntries.length === 0) {
@@ -48,7 +50,27 @@ export async function authenticateWithLDAP(username: string, password: string) {
     }
 
     const user = searchEntries[0];
+
+    // 2. Recherche des groupes POSIX associés à cet utilisateur
+    const { searchEntries: groupEntries } = await client.search('dc=hyris,dc=tv', {
+      filter: `(|(memberUid=${safeUsername})(gidNumber=${user.gidNumber}))`,
+      scope: 'sub',
+      attributes: ['cn', 'gidNumber'],
+    });
+
+    // 3. Normalisation et conversion explicite en string
+    user.groups = groupEntries.map(entry => {
+      const cn = entry.cn;
+      if (Array.isArray(cn)) {
+        return String(cn[0]);
+      }
+      return String(cn);
+    });
+
+    
+
     console.log("Étape 4 : Utilisateur trouvé ! Son chemin exact (DN) est :", user.dn);
+    console.log("Groupes récupérés pour l'utilisateur :", user.groups);
     
     console.log("Étape 5 : Test du mot de passe...");
     await client.bind(user.dn, password);
