@@ -59,9 +59,13 @@ export async function authenticateWithLDAP(username: string, password: string) {
     });
 
     // 3. Extraction propre des noms de groupes
+    // Remplace le bloc d'extraction par celui-ci :
     user.groups = groupEntries.map(entry => {
       const cn = entry.cn;
-      return Array.isArray(cn) ? String(cn[0]) : String(cn);
+      const rawCn = Array.isArray(cn) ? cn[0] : cn;
+      
+      // Convertit explicitement les Buffers en string si nécessaire
+      return Buffer.isBuffer(rawCn) ? rawCn.toString('utf8') : String(rawCn);
     });
 
         
