@@ -83,10 +83,7 @@ export default function MesReservations({
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Réservations</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tout le monde peut les voir ; seul leur créateur peut les modifier.
-            </p>
+            <h2 className="text-lg font-bold tracking-tight">Mes réservations</h2>
           </div>
         </div>
         <div className="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-muted/30 px-5 text-center">
@@ -108,10 +105,7 @@ export default function MesReservations({
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-lg font-bold tracking-tight">Réservations</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tout le monde peut les voir ; seul leur créateur peut les modifier.
-            </p>
+            <h2 className="text-lg font-bold tracking-tight">Mes réservations</h2>
           </div>
         </div>
         <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">

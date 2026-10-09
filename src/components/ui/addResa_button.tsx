@@ -161,9 +161,6 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             <h2 className="text-lg font-bold tracking-tight">
               Nouvelle réservation
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Planifiez un créneau et choisissez le matériel dont vous avez besoin.
-            </p>
           </div>
         </div>
 
