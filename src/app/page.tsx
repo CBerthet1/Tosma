@@ -36,9 +36,10 @@ export default async function Home({ searchParams }: PageProps) {
       ? db.select({
           id: matosTable.id,
           name: matosTable.name,
+          categoryId: matosTable.categoryId,
         }).from(matosTable)
       : Promise.resolve([]),
-    isAdmin && tab === "matos"
+    showReservations || (isAdmin && tab === "matos")
       ? db.select({
           id: categoryTable.id,
           name: categoryTable.name,
@@ -136,7 +137,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
           {showReservations && (
             <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
-              <BoutonAddResa matosList={allMatos} />
+              <BoutonAddResa matosList={allMatos} categories={categories} />
               <MesReservations_tab matosList={allMatos} />
             </div>
           )}

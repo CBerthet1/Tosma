@@ -23,13 +23,20 @@ const TIME_SLOTS = generateTimeSlots();
 type Matos = {
   id: number;
   name: string | null;
+  categoryId: number;
+};
+
+type Category = {
+  id: number;
+  name: string;
 };
 
 interface BoutonAddResaProps {
   matosList?: Matos[]; // Passer la liste des matériels depuis le serveur ou le parent
+  categories: Category[];
 }
 
-export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
+export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps) {
   const [startDate, setStartDate] = useState("");
   const [startTime, setStartTime] = useState("09:00");
 
@@ -51,6 +58,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
+  const [categoryId, setCategoryId] = useState("");
 
   const start = startDate ? new Date(`${startDate}T${startTime}`) : null;
   const end = endDate ? new Date(`${endDate}T${endTime}`) : null;
@@ -112,7 +120,9 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   const availableMatos = matosList.filter(
     (m) =>
       !selectedMatosIds.includes(m.id) &&
-      (m.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
+      (categoryId === "" || m.categoryId === Number(categoryId)) &&
+      (searchQuery.trim() === "" ||
+        (m.name?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ?? false))
   );
 
   // 3. Fonctions pour ajouter/retirer un tag
@@ -242,27 +252,55 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
           </div>
 
           {/* 4. Sélection du matériel avec champ de recherche */}
-          <div className="relative space-y-2 pt-1">
+          <div
+            className="relative space-y-2 pt-1"
+            onBlur={(event) => {
+              if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
+                setIsFocused(false);
+              }
+            }}
+          >
             <label className="flex items-center gap-2 text-sm font-semibold">
               <Package className="size-4 text-primary" aria-hidden="true" />
               Matériel à réserver
             </label>
 
-            {/* Champ de saisie pour la recherche */}
-            <input
-              type="text"
-              placeholder="Rechercher du matériel (ex: Caméra...)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              // Un léger délai sur le blur permet de cliquer sur un résultat avant qu'il ne disparaisse
-              onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-              className="w-full rounded-xl border border-input bg-background px-3 py-2.5 pl-9 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-            />
-            <Search className="pointer-events-none absolute left-3 top-[2.65rem] size-4 text-muted-foreground" aria-hidden="true" />
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="relative min-w-0 flex-1">
+                <input
+                  type="text"
+                  placeholder={
+                    hasValidDateRange
+                      ? "Rechercher du matériel (ex: Caméra...)"
+                      : "Choisissez vos dates pour rechercher du matériel"
+                  }
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  disabled={!hasValidDateRange}
+                  className="w-full rounded-xl border border-input bg-background px-3 py-2.5 pl-9 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              </div>
+              <select
+                aria-label="Catégories"
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setSearchQuery("");
+                }}
+                onFocus={() => setIsFocused(true)}
+                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 sm:w-48"
+              >
+                <option value="">Catégories</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </div>
 
-            {/* Liste déroulante des suggestions (visible seulement quand on cherche) */}
-            {isFocused && searchQuery.length > 0 && (
+            {/* Les catégories permettent d'afficher toute la liste correspondante sans terme de recherche. */}
+            {isFocused && hasValidDateRange && (searchQuery.trim().length > 0 || categoryId !== "") && (
               <div className="asso-options absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
                 {availableMatos.length > 0 ? (
                   availableMatos.map((item) => {
@@ -302,9 +340,9 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
             {checkingAvailability && (
               <p className="text-xs text-muted-foreground">Vérification de la disponibilité…</p>
             )}
-            {!checkingAvailability && !hasValidDateRange && (
+            {!hasValidDateRange && (
               <p className="text-xs text-muted-foreground">
-                Choisissez un créneau valide pour vérifier la disponibilité.
+                Choisissez une date de début et de fin valides pour rechercher du matériel.
               </p>
             )}
             {availabilityError && (
