@@ -153,7 +153,7 @@ export function BoutonAddResa({ matosList = [] }: BoutonAddResaProps) {
   return (
     <div className="asso-panel h-full w-full rounded-2xl border p-5 sm:p-6">
       <form onSubmit={handleSubmit} className="asso-form flex h-full flex-col space-y-6">
-        <div className="flex items-start gap-3 border-b pb-5">
+        <div className="flex items-center gap-3 border-b pb-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <CalendarPlus2 className="size-5" aria-hidden="true" />
           </span>

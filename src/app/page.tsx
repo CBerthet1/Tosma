@@ -136,8 +136,8 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
           {showReservations && (
             <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
-              <MesReservations_tab matosList={allMatos} />
               <BoutonAddResa matosList={allMatos} />
+              <MesReservations_tab matosList={allMatos} />
             </div>
           )}
 

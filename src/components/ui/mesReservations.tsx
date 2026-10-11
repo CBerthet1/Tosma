@@ -78,7 +78,7 @@ export default function MesReservations({
   if (reservations.length === 0) {
     return (
       <section className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
-        <div className="mb-5 flex items-start gap-3 border-b border-border/70 pb-5">
+        <div className="mb-5 flex items-center gap-3 border-b border-border/70 pb-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
@@ -100,7 +100,7 @@ export default function MesReservations({
   return (
     <section className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
       <div className="mb-5 flex items-start justify-between gap-3 border-b border-border/70 pb-5">
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <CalendarDays className="size-5" aria-hidden="true" />
           </span>
