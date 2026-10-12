@@ -121,7 +121,7 @@ export default async function Home({ searchParams }: PageProps) {
           {tab === "matos" && (
             <div className="flex flex-col gap-6 w-full">
               {isAdmin && <BoutonAddMatos categories={CATEGORIES} />}
-              <Matos_tab />
+              <Matos_tab isAdmin={isAdmin} />
             </div>
           )}
 
