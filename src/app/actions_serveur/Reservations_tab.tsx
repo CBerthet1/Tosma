@@ -4,6 +4,7 @@ import { db } from "../../drizzle/db";
 import { matosTable, resaTable } from "../../drizzle/schema";
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
 import { inArray } from "drizzle-orm";
+import { parseReservationMaterials } from "@/lib/reservation-materials";
 
 const RESERVATION_COLORS = [
   "#b08d55", // Amber (Moutarde grisée)
@@ -42,7 +43,11 @@ export default async function Reservations_tab() {
     })
     .from(resaTable);
 
-  const matosIds = [...new Set(rows.flatMap((row) => row.matos.map((item) => item.matosId)))];
+  const reservations = rows.map((row) => ({
+    ...row,
+    matos: parseReservationMaterials(row.matos),
+  }));
+  const matosIds = [...new Set(reservations.flatMap((row) => row.matos.map((item) => item.matosId)))];
   const materials = matosIds.length > 0
     ? await db
         .select({ id: matosTable.id, name: matosTable.name })
@@ -54,7 +59,7 @@ export default async function Reservations_tab() {
   return (
     <div className="w-full h-full flex flex-col">
       <CalendrierResa
-        reservations={rows.map((row): Reservation => ({
+        reservations={reservations.map((row): Reservation => ({
           id: row.id,
           title: row.title ?? "Réservation sans nom",
           start: new Date(row.start),

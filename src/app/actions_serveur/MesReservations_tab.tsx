@@ -3,6 +3,7 @@ import { db } from "../../drizzle/db";
 import { resaTable } from "../../drizzle/schema";
 import { and, eq, gt } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
+import { parseReservationMaterials } from "@/lib/reservation-materials";
 
 type MatosOption = {
   id: number;
@@ -39,7 +40,7 @@ export default async function MesReservations_tab({
         name: row.name ?? "",
         start: row.start,
         end: row.end,
-        matosIds: row.matos.map((item) => item.matosId),
+        matosIds: parseReservationMaterials(row.matos).map((item) => item.matosId),
         userId: row.userId,
       }))}
       matosList={matosList}

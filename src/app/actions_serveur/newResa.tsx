@@ -4,6 +4,7 @@ import { db } from "../../drizzle/db";
 import { matosTable, resaTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
 import { and, gt, inArray, lt } from "drizzle-orm";
+import { parseReservationMaterials } from "@/lib/reservation-materials";
 
 export async function getUnavailableMatosIds(start: Date, end: Date) {
   if (
@@ -34,7 +35,7 @@ export async function getUnavailableMatosIds(start: Date, end: Date) {
 
   const reservedByMatos = new Map<number, number>();
   for (const reservation of reservations) {
-    for (const item of reservation.matos) {
+    for (const item of parseReservationMaterials(reservation.matos)) {
       reservedByMatos.set(
         item.matosId,
         (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,

@@ -5,6 +5,7 @@ import { db } from "../../drizzle/db";
 import { matosTable, resaTable } from "../../drizzle/schema";
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { parseReservationMaterials } from "@/lib/reservation-materials";
 
 export async function updateResa(
   id: number,
@@ -80,7 +81,7 @@ export async function updateResa(
 
       const reservedByMatos = new Map<number, number>();
       for (const reservation of overlappingReservations) {
-        for (const item of reservation.matos) {
+        for (const item of parseReservationMaterials(reservation.matos)) {
           if (matosIds.includes(item.matosId)) {
             reservedByMatos.set(
               item.matosId,
