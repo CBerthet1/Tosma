@@ -40,7 +40,7 @@ export default async function MesReservations_tab({
         name: row.name ?? "",
         start: row.start,
         end: row.end,
-        matosIds: parseReservationMaterials(row.matos).map((item) => item.matosId),
+        matos: parseReservationMaterials(row.matos),
         userId: row.userId,
       }))}
       matosList={matosList}

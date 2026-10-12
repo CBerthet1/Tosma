@@ -50,3 +50,5 @@ Pour fusionner les réservations et leurs matériels, exécutez une seule fois `
 Pour intégrer la table `image` à `materiel`, exécutez une seule fois `scripts/merge-image-into-materiel.sql` avant de déployer le code mis à jour. L'URL est transférée dans `materiel.image`; lorsqu'un matériel a plusieurs images, celle dont l'identifiant est le plus petit est conservée. Le script supprime ensuite la table `image`. Faites une sauvegarde de la base avant d'exécuter la migration.
 
 Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.
+
+Lors d'une réservation, plusieurs unités d'un même matériel peuvent être demandées. La quantité disponible est calculée selon le stock et les réservations qui se chevauchent ; elle est également contrôlée lors de la création et de la modification.

@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAvailableMatosQuantities } from "@/app/actions_serveur/newResa";
 import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { Button } from "@/components/ui/button";
 import { CalendarClock, CalendarDays, Package, PencilLine, Search, X } from "lucide-react";
+import type { ReservationMaterial } from "@/drizzle/schema";
 
 export type ReservationToEdit = {
   id: number;
   name: string;
   start: Date;
   end: Date;
-  matosIds: number[];
+  matos: ReservationMaterial[];
   userId: string | null;
 };
 
 type MatosOption = {
   id: number;
   name: string | null;
+  quantity: number;
 };
 
 type MesReservationsProps = {
@@ -41,15 +44,74 @@ export default function MesReservations({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [selectedMatosIds, setSelectedMatosIds] = useState<number[]>([]);
+  const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const selectedMatos = matosList.filter((matos) => selectedMatosIds.includes(matos.id));
+  const [editRange, setEditRange] = useState({
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+  });
+  const [availabilityResult, setAvailabilityResult] = useState<{
+    key: string;
+    quantities: Record<number, number>;
+    error?: string;
+  } | null>(null);
+  const availabilityKey = `${editingId}/${editRange.startDate}T${editRange.startTime}/${editRange.endDate}T${editRange.endTime}`;
+  const hasCurrentAvailability = availabilityResult?.key === availabilityKey;
+  const availableQuantities = hasCurrentAvailability ? availabilityResult?.quantities ?? {} : {};
+  const checkingAvailability = editingId !== null && !hasCurrentAvailability;
+  const availabilityError = hasCurrentAvailability ? availabilityResult?.error ?? "" : "";
+  const selectedMatosIds = Object.keys(selectedMatos).map(Number);
+  const selectedItems = matosList.filter((matos) => selectedMatosIds.includes(matos.id));
+  const hasInsufficientAvailability = selectedMatosIds.some(
+    (id) => selectedMatos[id] > (availableQuantities[id] ?? 0),
+  );
   const availableMatos = matosList.filter(
     (matos) =>
+      (availableQuantities[matos.id] ?? 0) > 0 &&
       !selectedMatosIds.includes(matos.id) &&
       (matos.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false),
   );
+
+  useEffect(() => {
+    if (
+      editingId === null ||
+      !editRange.startDate ||
+      !editRange.endDate
+    ) return;
+    const start = new Date(`${editRange.startDate}T${editRange.startTime}`);
+    const end = new Date(`${editRange.endDate}T${editRange.endTime}`);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start >= end) return;
+
+    let cancelled = false;
+    const key = `${editingId}/${editRange.startDate}T${editRange.startTime}/${editRange.endDate}T${editRange.endTime}`;
+    getAvailableMatosQuantities(start, end, editingId)
+      .then((items) => {
+        if (!cancelled) {
+          setAvailabilityResult({
+            key,
+            quantities: Object.fromEntries(items.map((item) => [item.id, item.quantity])),
+          });
+        }
+      })
+      .catch((reason: unknown) => {
+        if (!cancelled) {
+          setAvailabilityResult({
+            key,
+            quantities: {},
+            error: reason instanceof Error
+              ? reason.message
+              : "La disponibilité du matériel n'a pas pu être vérifiée.",
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editingId, editRange]);
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -64,9 +126,15 @@ export default function MesReservations({
     const end = new Date(`${formData.get("endDate")}T${formData.get("endTime")}`);
     const name = String(formData.get("name") ?? "");
     try {
-      await updateResa(reservation.id, start, end, name, selectedMatosIds);
+      await updateResa(
+        reservation.id,
+        start,
+        end,
+        name,
+        selectedMatosIds.map((matosId) => ({ matosId, quantity: selectedMatos[matosId] })),
+      );
       setEditingId(null);
-      setSelectedMatosIds([]);
+      setSelectedMatos({});
       setSearchQuery("");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "La modification a échoué.");
@@ -149,7 +217,8 @@ export default function MesReservations({
                         name="startDate"
                         aria-label="Date de début"
                         type="date"
-                        defaultValue={start.date}
+                        value={editRange.startDate}
+                        onChange={(event) => setEditRange((range) => ({ ...range, startDate: event.target.value }))}
                         required
                         className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm"
                       />
@@ -157,7 +226,8 @@ export default function MesReservations({
                         name="startTime"
                         aria-label="Heure de début"
                         type="time"
-                        defaultValue={start.time}
+                        value={editRange.startTime}
+                        onChange={(event) => setEditRange((range) => ({ ...range, startTime: event.target.value }))}
                         required
                         className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm"
                       />
@@ -168,7 +238,8 @@ export default function MesReservations({
                         name="endDate"
                         aria-label="Date de fin"
                         type="date"
-                        defaultValue={end.date}
+                        value={editRange.endDate}
+                        onChange={(event) => setEditRange((range) => ({ ...range, endDate: event.target.value }))}
                         required
                         className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm"
                       />
@@ -176,7 +247,8 @@ export default function MesReservations({
                         name="endTime"
                         aria-label="Heure de fin"
                         type="time"
-                        defaultValue={end.time}
+                        value={editRange.endTime}
+                        onChange={(event) => setEditRange((range) => ({ ...range, endTime: event.target.value }))}
                         required
                         className="w-full rounded-lg border border-input bg-background px-2.5 py-2 text-sm"
                       />
@@ -210,12 +282,15 @@ export default function MesReservations({
                                     type="button"
                                     onMouseDown={(event) => event.preventDefault()}
                                     onClick={() => {
-                                      setSelectedMatosIds((previous) => [...previous, matos.id]);
+                                      setSelectedMatos((previous) => ({ ...previous, [matos.id]: 1 }));
                                       setSearchQuery("");
                                     }}
-                                    className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-primary/10"
+                                    className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-primary/10"
                                   >
                                     {matos.name ?? "Matériel sans nom"}
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      {availableQuantities[matos.id]} disponible(s)
+                                    </span>
                                   </button>
                                 ))
                               ) : (
@@ -226,25 +301,63 @@ export default function MesReservations({
                             </div>
                           )}
                         </div>
-                        {selectedMatos.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pt-1">
-                            {selectedMatos.map((matos) => (
-                              <span
-                                key={matos.id}
-                                className="asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-                              >
-                                {matos.name ?? "Matériel sans nom"}
-                                <button
-                                  type="button"
-                                  aria-label={`Retirer ${matos.name ?? "ce matériel"}`}
-                                  onClick={() => setSelectedMatosIds((previous) => previous.filter((id) => id !== matos.id))}
-                                  className="rounded-full text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                >
-                                  <X className="size-3.5" aria-hidden="true" />
-                                </button>
-                              </span>
-                            ))}
+                        {selectedItems.length > 0 && (
+                          <div className="space-y-2 pt-1">
+                            {selectedItems.map((matos) => {
+                              const remaining = availableQuantities[matos.id] ?? 0;
+                              return (
+                                <div key={matos.id} className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2">
+                                  <span className="min-w-0 flex-1 break-words text-sm font-medium">
+                                    {matos.name ?? "Matériel sans nom"}
+                                    <span className="ml-2 text-xs text-muted-foreground">
+                                      {remaining} disponible(s)
+                                    </span>
+                                  </span>
+                                  <label className="flex shrink-0 items-center gap-2 text-xs font-medium">
+                                    Quantité
+                                    <input
+                                      aria-label={`Quantité de ${matos.name ?? "ce matériel"}`}
+                                      type="number"
+                                      min={1}
+                                      max={remaining || 1}
+                                      value={selectedMatos[matos.id]}
+                                      onChange={(event) => {
+                                        const quantity = Number(event.target.value);
+                                        setSelectedMatos((previous) => ({
+                                          ...previous,
+                                          [matos.id]: quantity,
+                                        }));
+                                      }}
+                                      className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    aria-label={`Retirer ${matos.name ?? "ce matériel"}`}
+                                    onClick={() => setSelectedMatos((previous) => {
+                                      const next = { ...previous };
+                                      delete next[matos.id];
+                                      return next;
+                                    })}
+                                    className="rounded-full text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  >
+                                    <X className="size-4" aria-hidden="true" />
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
+                        )}
+                        {checkingAvailability && (
+                          <p className="text-xs text-muted-foreground">Vérification de la disponibilité…</p>
+                        )}
+                        {availabilityError && (
+                          <p role="alert" className="text-xs text-destructive">{availabilityError}</p>
+                        )}
+                        {hasInsufficientAvailability && !checkingAvailability && (
+                          <p role="alert" className="text-xs text-destructive">
+                            La quantité choisie dépasse le stock disponible pour ce créneau.
+                          </p>
                         )}
                       </>
                     ) : (
@@ -257,7 +370,14 @@ export default function MesReservations({
                   )}
 
                   <div className="flex flex-wrap gap-2 border-t border-border/70 pt-3">
-                    <Button type="submit" disabled={isLoading}>
+                    <Button
+                      type="submit"
+                      disabled={
+                        isLoading ||
+                        (selectedMatosIds.length > 0 &&
+                          (checkingAvailability || Boolean(availabilityError) || hasInsufficientAvailability))
+                      }
+                    >
                       {isLoading ? "Enregistrement..." : "Enregistrer"}
                     </Button>
                     <Button
@@ -265,7 +385,7 @@ export default function MesReservations({
                       variant="outline"
                       onClick={() => {
                         setEditingId(null);
-                        setSelectedMatosIds([]);
+                        setSelectedMatos({});
                         setSearchQuery("");
                         setError("");
                       }}
@@ -294,7 +414,15 @@ export default function MesReservations({
                         size="sm"
                         className="shrink-0 gap-1.5"
                         onClick={() => {
-                          setSelectedMatosIds(reservation.matosIds);
+                          setSelectedMatos(Object.fromEntries(
+                            reservation.matos.map((item) => [item.matosId, item.quantity]),
+                          ));
+                          setEditRange({
+                            startDate: start.date,
+                            startTime: start.time,
+                            endDate: end.date,
+                            endTime: end.time,
+                          });
                           setSearchQuery("");
                           setEditingId(reservation.id);
                           setError("");
@@ -312,8 +440,8 @@ export default function MesReservations({
                   <div className="flex items-start gap-2 border-t border-border/60 pt-3 text-sm">
                     <Package className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                     <p className="min-w-0 break-words text-muted-foreground">
-                      {reservation.matosIds
-                        .map((id) => matosList.find((matos) => matos.id === id)?.name ?? "Matériel supprimé")
+                      {reservation.matos
+                        .map((item) => `${matosList.find((matos) => matos.id === item.matosId)?.name ?? "Matériel supprimé"} × ${item.quantity}`)
                         .join(", ") || "Aucun matériel"}
                     </p>
                   </div>

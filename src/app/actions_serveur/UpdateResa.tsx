@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
-import { matosTable, resaTable } from "../../drizzle/schema";
+import { matosTable, resaTable, type ReservationMaterial } from "../../drizzle/schema";
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
@@ -12,7 +12,7 @@ export async function updateResa(
   start: Date,
   end: Date,
   name: string,
-  matosIds: number[],
+  matos: ReservationMaterial[],
 ) {
   const session = await auth();
   const userId = session?.user?.id;
@@ -31,9 +31,17 @@ export async function updateResa(
     Number.isNaN(start.getTime()) ||
     Number.isNaN(end.getTime()) ||
     start >= end ||
-    !Array.isArray(matosIds) ||
-    !matosIds.every((matosId) => Number.isInteger(matosId) && matosId > 0) ||
-    new Set(matosIds).size !== matosIds.length
+    !Array.isArray(matos) ||
+    !matos.every(
+      (item) =>
+        item !== null &&
+        typeof item === "object" &&
+        Number.isInteger(item.matosId) &&
+        item.matosId > 0 &&
+        Number.isInteger(item.quantity) &&
+        item.quantity > 0,
+    ) ||
+    new Set(matos.map((item) => item.matosId)).size !== matos.length
   ) {
     throw new Error("Les informations de réservation sont invalides.");
   }
@@ -48,7 +56,7 @@ export async function updateResa(
       throw new Error("Vous ne pouvez modifier que les réservations que vous avez créées.");
     }
 
-    if (matosIds.length > 0) {
+    if (matos.length > 0) {
       const existingMatos = await tx
         .select({
           id: matosTable.id,
@@ -56,9 +64,9 @@ export async function updateResa(
           quantity: matosTable.quantity,
         })
         .from(matosTable)
-        .where(inArray(matosTable.id, matosIds));
+        .where(inArray(matosTable.id, matos.map((item) => item.matosId)));
 
-      if (existingMatos.length !== matosIds.length) {
+      if (existingMatos.length !== matos.length) {
         throw new Error("Un des matériels sélectionnés n'existe plus.");
       }
 
@@ -82,7 +90,7 @@ export async function updateResa(
       const reservedByMatos = new Map<number, number>();
       for (const reservation of overlappingReservations) {
         for (const item of parseReservationMaterials(reservation.matos)) {
-          if (matosIds.includes(item.matosId)) {
+          if (matos.some((selected) => selected.matosId === item.matosId)) {
             reservedByMatos.set(
               item.matosId,
               (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
@@ -92,12 +100,16 @@ export async function updateResa(
       }
 
       if (
-        existingMatos.some(
-          (matos) =>
-            (reservedByMatos.get(matos.id) ?? 0) >= matos.quantity,
-        )
+        matos.some((item) => {
+          const material = existingMatos.find(({ id }) => id === item.matosId);
+          return (
+            !material?.available ||
+            item.quantity >
+              material.quantity - (reservedByMatos.get(item.matosId) ?? 0)
+          );
+        })
       ) {
-        throw new Error("Un des matériels sélectionnés n'est pas disponible à cet horaire.");
+        throw new Error("La quantité demandée n'est pas disponible à cet horaire.");
       }
     }
 
@@ -107,7 +119,7 @@ export async function updateResa(
         name: normalizedName,
         start,
         end,
-        matos: matosIds.map((matosId) => ({ matosId, quantity: 1 })),
+        matos,
       })
       .where(and(eq(resaTable.id, id), eq(resaTable.user, userId)));
   });

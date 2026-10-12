@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { getUnavailableMatosIds, newResa } from "../../app/actions_serveur/newResa";
+import { getAvailableMatosQuantities, newResa } from "../../app/actions_serveur/newResa";
 import { CalendarPlus2, Package, Search, X } from "lucide-react";
 import type { Category } from "@/lib/categories";
 
@@ -42,10 +42,10 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const [name, setName] = useState("");
   
   // 1. État pour suivre les équipements sélectionnés
-  const [selectedMatosIds, setSelectedMatosIds] = useState<number[]>([]);
+  const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>({});
   const [availabilityResult, setAvailabilityResult] = useState<{
     key: string;
-    unavailableIds: number[];
+    quantities: Record<number, number>;
     error?: string;
   } | null>(null);
   
@@ -67,12 +67,15 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   );
   const availabilityKey = `${startDate}T${startTime}/${endDate}T${endTime}`;
   const hasCurrentAvailability = availabilityResult?.key === availabilityKey;
-  const unavailableMatosIds =
-    hasValidDateRange && hasCurrentAvailability ? availabilityResult?.unavailableIds ?? [] : [];
+  const availableQuantities =
+    hasValidDateRange && hasCurrentAvailability ? availabilityResult?.quantities ?? {} : {};
   const checkingAvailability = hasValidDateRange && !hasCurrentAvailability;
   const availabilityError =
     hasCurrentAvailability ? availabilityResult?.error ?? "" : "";
-  const unavailableSelectedMatos = selectedMatosIds.some((id) => unavailableMatosIds.includes(id));
+  const selectedMatosIds = Object.keys(selectedMatos).map(Number);
+  const hasInsufficientAvailability = selectedMatosIds.some(
+    (id) => selectedMatos[id] > (availableQuantities[id] ?? 0),
+  );
 
   useEffect(() => {
     if (!startDate || !endDate) return;
@@ -87,17 +90,20 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
     let cancelled = false;
     const key = `${startDate}T${startTime}/${endDate}T${endTime}`;
 
-    getUnavailableMatosIds(availabilityStart, availabilityEnd)
-      .then((ids) => {
+    getAvailableMatosQuantities(availabilityStart, availabilityEnd)
+      .then((items) => {
         if (!cancelled) {
-          setAvailabilityResult({ key, unavailableIds: ids });
+          setAvailabilityResult({
+            key,
+            quantities: Object.fromEntries(items.map((item) => [item.id, item.quantity])),
+          });
         }
       })
       .catch((error: unknown) => {
         if (!cancelled) {
           setAvailabilityResult({
             key,
-            unavailableIds: [],
+            quantities: {},
             error:
               error instanceof Error
                 ? error.message
@@ -112,23 +118,30 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   }, [startDate, startTime, endDate, endTime]);
 
   // 2. Déduction des listes (ceux déjà sélectionnés VS ceux qu'on peut chercher)
-  const selectedMatos = matosList.filter((m) => selectedMatosIds.includes(m.id));
-  const availableMatos = matosList.filter(
-    (m) =>
+  const selectedItems = matosList.filter((m) => selectedMatosIds.includes(m.id));
+  const availableMatos = matosList.filter((m) => {
+    const remaining = availableQuantities[m.id] ?? 0;
+    return (
+      remaining > 0 &&
       !selectedMatosIds.includes(m.id) &&
       (categorie === "" || m.categorie === categorie) &&
       (searchQuery.trim() === "" ||
         (m.name?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ?? false))
-  );
+    );
+  });
 
   // 3. Fonctions pour ajouter/retirer un tag
   const handleAddMatos = (id: number) => {
-    setSelectedMatosIds((prev) => [...prev, id]);
+    setSelectedMatos((previous) => ({ ...previous, [id]: 1 }));
     setSearchQuery(""); // On vide la recherche après un ajout
   };
 
   const handleRemoveMatos = (id: number) => {
-    setSelectedMatosIds((prev) => prev.filter((mId) => mId !== id));
+    setSelectedMatos((previous) => {
+      const next = { ...previous };
+      delete next[id];
+      return next;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,13 +155,18 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
       const end = new Date(`${endDate}T${endTime}`);
 
       // 3. Appel de newResa avec la liste des matériels
-      await newResa(start, end, name, selectedMatosIds);
+      await newResa(
+        start,
+        end,
+        name,
+        selectedMatosIds.map((matosId) => ({ matosId, quantity: selectedMatos[matosId] })),
+      );
 
       // Remise à zéro des champs
       setName("");
       setStartDate("");
       setEndDate("");
-      setSelectedMatosIds([]);
+      setSelectedMatos({});
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "La réservation n'a pas pu être créée.");
     } finally {
@@ -300,9 +318,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               <div className="asso-options mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
                 {availableMatos.length > 0 ? (
                   availableMatos.map((item) => {
-                    const isUnavailable = unavailableMatosIds.includes(item.id);
                     const isDisabled =
-                      isUnavailable ||
                       checkingAvailability ||
                       Boolean(availabilityError) ||
                       !hasValidDateRange;
@@ -320,9 +336,9 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
                         }`}
                       >
                         {item.name ?? "Matériel sans nom"}
-                        {isUnavailable ? (
-                          <span className="ml-2 text-xs">(non disponible à cet horaire)</span>
-                        ) : null}
+                        <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                          {availableQuantities[item.id]} disponible(s)
+                        </span>
                       </button>
                     );
                   })
@@ -348,30 +364,53 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
         </div> {/* <-- Il manquait la fermeture de la div globale "space-y-4" ici */}
 
         {/* Affichage du matériel déjà sélectionné sous forme de tags */}
-            {selectedMatos.length > 0 && (
-              <div className="flex flex-wrap gap-2 pb-2">
-                {selectedMatos.map((item) => (
-                  <span 
-                    key={item.id} 
-                    className={`asso-tag inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      unavailableMatosIds.includes(item.id) ? "text-muted-foreground opacity-60" : ""
-                    }`}
-                  >
-                    {item.name}
-                    {unavailableMatosIds.includes(item.id) && (
-                      <span>(non disponible à cet horaire)</span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMatos(item.id)}
-                      aria-label={`Retirer ${item.name ?? "ce matériel"}`}
-                      className="rounded-full text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <X className="size-3.5" aria-hidden="true" />
-                    </button>
-                  </span>
-                ))}
+            {selectedItems.length > 0 && (
+              <div className="space-y-2 pb-2">
+                {selectedItems.map((item) => {
+                  const remaining = availableQuantities[item.id] ?? 0;
+                  return (
+                    <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2">
+                      <span className="min-w-0 flex-1 break-words text-sm font-medium">
+                        {item.name ?? "Matériel sans nom"}
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {remaining} disponible(s)
+                        </span>
+                      </span>
+                      <label className="flex shrink-0 items-center gap-2 text-xs font-medium">
+                        Quantité
+                        <input
+                          aria-label={`Quantité de ${item.name ?? "ce matériel"}`}
+                          type="number"
+                          min={1}
+                          max={remaining || 1}
+                          value={selectedMatos[item.id]}
+                          onChange={(event) => {
+                            const quantity = Number(event.target.value);
+                            setSelectedMatos((previous) => ({
+                              ...previous,
+                              [item.id]: quantity,
+                            }));
+                          }}
+                          className="w-16 rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveMatos(item.id)}
+                        aria-label={`Retirer ${item.name ?? "ce matériel"}`}
+                        className="rounded-full text-muted-foreground transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <X className="size-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
+            )}
+            {hasInsufficientAvailability && !checkingAvailability && (
+              <p role="alert" className="text-xs text-destructive">
+                La quantité choisie dépasse le stock disponible pour ce créneau.
+              </p>
             )}
 
         {/* Actions */}
@@ -392,7 +431,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
             disabled={
               loading ||
               (selectedMatosIds.length > 0 &&
-                (checkingAvailability || Boolean(availabilityError) || unavailableSelectedMatos))
+                (checkingAvailability || Boolean(availabilityError) || hasInsufficientAvailability))
             }
             className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
           >
