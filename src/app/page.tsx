@@ -89,7 +89,7 @@ export default async function Home({ searchParams }: PageProps) {
                   : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
               }`}
             >
-              Le matos
+              Inventaire
             </Link>
           </nav>
 
