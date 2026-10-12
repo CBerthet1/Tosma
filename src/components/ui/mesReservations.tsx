@@ -33,6 +33,10 @@ function toLocalDateTimeParts(date: Date) {
   const value = new Date(date);
   return {
     date: `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`,
+    displayDate: value.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+    }),
     time: `${String(value.getHours()).padStart(2, "0")}:${String(value.getMinutes()).padStart(2, "0")}`,
   };
 }
@@ -436,7 +440,7 @@ export default function MesReservations({
                       </h3>
                       <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                         <CalendarClock className="size-3.5 shrink-0" aria-hidden="true" />
-                        <span>{start.date} à {start.time} – {end.date} à {end.time}</span>
+                        <span>{start.displayDate} à {start.time} – {end.displayDate} à {end.time}</span>
                       </p>
                     </div>
                     {canEdit ? (
