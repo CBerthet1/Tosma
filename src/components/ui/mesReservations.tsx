@@ -26,6 +26,7 @@ type MesReservationsProps = {
   reservations: ReservationToEdit[];
   matosList: MatosOption[];
   currentUserId: string;
+  reservationToEditId: number | null;
 };
 
 function toLocalDateTimeParts(date: Date) {
@@ -40,6 +41,7 @@ export default function MesReservations({
   reservations,
   matosList,
   currentUserId,
+  reservationToEditId,
 }: MesReservationsProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -74,6 +76,35 @@ export default function MesReservations({
       !selectedMatosIds.includes(matos.id) &&
       (matos.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false),
   );
+
+  useEffect(() => {
+    const reservation = reservations.find(
+      (item) =>
+        item.id === reservationToEditId && item.userId === currentUserId,
+    );
+    if (!reservation) return;
+
+    const start = toLocalDateTimeParts(reservation.start);
+    const end = toLocalDateTimeParts(reservation.end);
+    setEditingId(reservation.id);
+    setSelectedMatos(Object.fromEntries(
+      reservation.matos.map((item) => [item.matosId, item.quantity]),
+    ));
+    setEditRange({
+      startDate: start.date,
+      startTime: start.time,
+      endDate: end.date,
+      endTime: end.time,
+    });
+    setSearchQuery("");
+  }, [reservationToEditId, reservations, currentUserId]);
+
+  useEffect(() => {
+    if (editingId === null) return;
+    document
+      .getElementById(`reservation-${editingId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [editingId]);
 
   useEffect(() => {
     if (
@@ -145,7 +176,7 @@ export default function MesReservations({
 
   if (reservations.length === 0) {
     return (
-      <section className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
+      <section id="mes-reservations" className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
         <div className="mb-5 flex items-center gap-3 border-b border-border/70 pb-5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <CalendarDays className="size-5" aria-hidden="true" />
@@ -166,7 +197,7 @@ export default function MesReservations({
   }
 
   return (
-    <section className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
+    <section id="mes-reservations" className="asso-panel flex h-full w-full flex-col rounded-2xl border p-5 sm:p-6">
       <div className="mb-5 flex items-start justify-between gap-3 border-b border-border/70 pb-5">
         <div className="flex items-center gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -192,6 +223,7 @@ export default function MesReservations({
           return (
             <article
               key={reservation.id}
+              id={`reservation-${reservation.id}`}
               className="group rounded-xl border border-border/70 bg-background/70 p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
             >
               {isEditing ? (

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Package, UserRound, X } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, Package, PencilLine, UserRound, X } from "lucide-react";
 
 // --- TYPES ---
 export type Reservation = {
@@ -16,6 +17,7 @@ export type Reservation = {
 
 type WeeklyCalendarProps = {
   reservations: Reservation[];
+  currentUserId: string | null;
 };
 
 // --- PARAMÈTRES D'AFFICHAGE ---
@@ -69,7 +71,10 @@ function calculateLayout(events: Reservation[]) {
   return positions;
 }
 
-export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
+export default function WeeklyCalendar({
+  reservations,
+  currentUserId,
+}: WeeklyCalendarProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
@@ -372,6 +377,16 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
               )}
             </section>
           </div>
+          {currentUserId &&
+            selectedReservation.reservedBy === currentUserId && (
+              <Link
+                href={`/?tab=mes-reservations&edit=${selectedReservation.id}#reservation-${selectedReservation.id}`}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <PencilLine className="size-4" aria-hidden="true" />
+                Modifier ma réservation
+              </Link>
+            )}
         </aside>
       </div>
     )}

@@ -12,8 +12,10 @@ type MatosOption = {
 
 export default async function MesReservations_tab({
   matosList,
+  reservationToEditId,
 }: {
   matosList: MatosOption[];
+  reservationToEditId: number | null;
 }) {
   const session = await auth();
   if (!session?.user) {
@@ -45,6 +47,7 @@ export default async function MesReservations_tab({
       }))}
       matosList={matosList}
       currentUserId={session.user.id}
+      reservationToEditId={reservationToEditId}
     />
   );
 }

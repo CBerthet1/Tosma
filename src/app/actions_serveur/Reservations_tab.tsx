@@ -2,7 +2,7 @@
 
 import { db } from "../../drizzle/db";
 import { matosTable, resaTable } from "../../drizzle/schema";
-import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
+import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa";
 import { inArray } from "drizzle-orm";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
 
@@ -31,7 +31,11 @@ function getStringColor(str: string | number) {
 }
 
 // Fonction pour récupérer les réservations
-export default async function Reservations_tab() {
+export default async function Reservations_tab({
+  currentUserId,
+}: {
+  currentUserId: string | null;
+}) {
   const rows = await db
     .select({
       id: resaTable.id,
@@ -59,6 +63,7 @@ export default async function Reservations_tab() {
   return (
     <div className="w-full h-full flex flex-col">
       <CalendrierResa
+        currentUserId={currentUserId}
         reservations={reservations.map((row): Reservation => ({
           id: row.id,
           title: row.title ?? "Réservation sans nom",

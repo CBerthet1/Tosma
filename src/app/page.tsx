@@ -17,12 +17,12 @@ import { LogOut } from "lucide-react";
 
 // On type les searchParams pour l'URL
 type PageProps = {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; edit?: string }>;
 };
 
 // Ne pas oublier "async" puisque searchParams est une Promise dans Next.js
 export default async function Home({ searchParams }: PageProps) {
-  const [{ tab = "resas" }, session] = await Promise.all([
+  const [{ tab = "resas", edit }, session] = await Promise.all([
     searchParams,
     auth(),
   ]);
@@ -113,7 +113,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET 1 : RÉSERVATIONS */}
           {tab === "resas" && (
             <div className="flex w-full min-w-0 flex-col gap-6">
-              <Reservations_tab />
+              <Reservations_tab currentUserId={session?.user?.id ?? null} />
             </div>
           )}
 
@@ -129,7 +129,12 @@ export default async function Home({ searchParams }: PageProps) {
           {showReservations && (
             <div className="grid w-full grid-cols-1 items-start gap-8 lg:grid-cols-2">
               <BoutonAddResa matosList={allMatos} categories={CATEGORIES} />
-              <MesReservations_tab matosList={allMatos} />
+              <MesReservations_tab
+                matosList={allMatos}
+                reservationToEditId={
+                  edit && /^\d+$/.test(edit) ? Number(edit) : null
+                }
+              />
             </div>
           )}
 
