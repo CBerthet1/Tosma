@@ -37,8 +37,10 @@ export default async function Reservations_tab() {
       title: resaTable.name,
       start: resaTable.start,
       end: resaTable.end,
+      user: resaTable.user,
       matosId: resaMatosTable.matosId,
       matosName: matosTable.name,
+      matosQuantity: resaMatosTable.quantity,
     })
     .from(resaTable)
     .leftJoin(resaMatosTable, eq(resaTable.id, resaMatosTable.resaId))
@@ -53,6 +55,7 @@ export default async function Reservations_tab() {
         title: row.title ?? "Réservation sans nom",
         start: new Date(row.start),
         end: new Date(row.end),
+        reservedBy: row.user,
         matos: [],
         color: getStringColor(row.id),
       };
@@ -60,7 +63,10 @@ export default async function Reservations_tab() {
     }
 
     if (row.matosId !== null) {
-      event.matos.push(row.matosName ?? "Matériel sans nom");
+      event.matos.push({
+        name: row.matosName ?? "Matériel sans nom",
+        quantity: row.matosQuantity ?? 1,
+      });
     }
   }
 

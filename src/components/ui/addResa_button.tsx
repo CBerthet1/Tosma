@@ -23,12 +23,11 @@ const TIME_SLOTS = generateTimeSlots();
 type Matos = {
   id: number;
   name: string | null;
-  categoryId: number;
+  categorie: string;
 };
 
 type Category = {
-  id: number;
-  name: string;
+  categorie: string;
 };
 
 interface BoutonAddResaProps {
@@ -58,7 +57,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
-  const [categoryId, setCategoryId] = useState("");
+  const [categorie, setCategorie] = useState("");
 
   const start = startDate ? new Date(`${startDate}T${startTime}`) : null;
   const end = endDate ? new Date(`${endDate}T${endTime}`) : null;
@@ -120,7 +119,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const availableMatos = matosList.filter(
     (m) =>
       !selectedMatosIds.includes(m.id) &&
-      (categoryId === "" || m.categoryId === Number(categoryId)) &&
+      (categorie === "" || m.categorie === categorie) &&
       (searchQuery.trim() === "" ||
         (m.name?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ?? false))
   );
@@ -284,9 +283,9 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               </div>
               <select
                 aria-label="Catégories"
-                value={categoryId}
+                value={categorie}
                 onChange={(e) => {
-                  setCategoryId(e.target.value);
+                  setCategorie(e.target.value);
                   setSearchQuery("");
                 }}
                 onFocus={() => setIsFocused(true)}
@@ -294,13 +293,13 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               >
                 <option value="">Catégories</option>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
+                  <option key={category.categorie} value={category.categorie}>{category.categorie}</option>
                 ))}
               </select>
             </div>
 
             {/* Les catégories permettent d'afficher toute la liste correspondante sans terme de recherche. */}
-            {isFocused && hasValidDateRange && (searchQuery.trim().length > 0 || categoryId !== "") && (
+            {isFocused && hasValidDateRange && (searchQuery.trim().length > 0 || categorie !== "") && (
               <div className="asso-options absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
                 {availableMatos.length > 0 ? (
                   availableMatos.map((item) => {

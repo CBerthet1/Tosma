@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Package, UserRound, X } from "lucide-react";
 
 // --- TYPES ---
 export type Reservation = {
@@ -8,7 +9,8 @@ export type Reservation = {
   title: string;
   start: Date;
   end: Date;
-  matos: string[];
+  reservedBy: string | null;
+  matos: { name: string; quantity: number }[];
   color?: string;
 };
 
@@ -69,6 +71,18 @@ function calculateLayout(events: Reservation[]) {
 
 export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+
+  useEffect(() => {
+    if (!selectedReservation) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedReservation(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedReservation]);
 
   // --- FONCTIONS DE NAVIGATION ---
   const handlePreviousWeek = () => {
@@ -121,6 +135,7 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
   });
 
   return (
+    <>
     <div className="asso-panel flex h-full w-full min-w-0 flex-col overflow-hidden rounded-2xl border shadow-sm">
       
       {/* BARRE DE NAVIGATION ET TITRE */}
@@ -233,9 +248,12 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                     const finalHeight = Math.max(heightPercent, 1.5); 
 
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={event.id}
-                        className="absolute cursor-pointer overflow-hidden rounded-lg border border-white/35 p-1.5 text-xs text-white shadow-md transition-transform hover:z-20 hover:scale-[1.02]"
+                        onClick={() => setSelectedReservation(event)}
+                        aria-label={`Afficher les détails de la réservation ${event.title}`}
+                        className="absolute cursor-pointer overflow-hidden rounded-lg border border-white/35 p-1.5 text-left text-xs text-white shadow-md transition-transform hover:z-20 hover:scale-[1.02] focus-visible:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         style={{
                           top: `${topPercent}%`,
                           height: `${finalHeight}%`,
@@ -246,9 +264,9 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
                       >
                         <div className="font-bold truncate">{event.title}</div>
                         <div className="mt-0.5 whitespace-normal break-words text-[10px] opacity-90">
-                          Matos : {event.matos.join(", ") || "Aucun"}
+                          Matos : {event.matos.map((item) => item.name).join(", ") || "Aucun"}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -257,6 +275,106 @@ export default function WeeklyCalendar({ reservations }: WeeklyCalendarProps) {
           </div>
         </div>
       </div>
-    
+    {selectedReservation && (
+      <div className="fixed inset-0 z-50">
+        <button
+          type="button"
+          aria-label="Fermer les détails de la réservation"
+          onClick={() => setSelectedReservation(null)}
+          className="absolute inset-0 size-full cursor-default bg-black/35"
+        />
+        <aside
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reservation-details-title"
+          className="asso-panel absolute inset-y-0 right-0 flex w-full max-w-md flex-col overflow-y-auto border-l p-6 shadow-2xl"
+        >
+          <div className="mb-6 flex items-start justify-between gap-4 border-b border-border/70 pb-5">
+            <div className="min-w-0">
+              <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Détails de la réservation
+              </p>
+              <h2 id="reservation-details-title" className="break-words text-xl font-extrabold">
+                {selectedReservation.title}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedReservation(null)}
+              aria-label="Fermer"
+              className="shrink-0 rounded-lg border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
+                <UserRound className="size-4 text-primary" aria-hidden="true" />
+                Réservé par
+              </h3>
+              <p className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 text-sm">
+                {selectedReservation.reservedBy || "Utilisateur inconnu"}
+              </p>
+            </section>
+
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
+                <CalendarDays className="size-4 text-primary" aria-hidden="true" />
+                Dates
+              </h3>
+              <div className="space-y-3 rounded-xl border border-border/70 bg-background/70 p-4 text-sm">
+                <div>
+                  <p className="mb-1 text-xs font-semibold text-muted-foreground">Début</p>
+                  <p className="font-medium">
+                    {selectedReservation.start.toLocaleString("fr-FR", {
+                      dateStyle: "full",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                </div>
+                <div className="border-t border-border/70 pt-3">
+                  <p className="mb-1 text-xs font-semibold text-muted-foreground">Fin</p>
+                  <p className="font-medium">
+                    {selectedReservation.end.toLocaleString("fr-FR", {
+                      dateStyle: "full",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
+                <Package className="size-4 text-primary" aria-hidden="true" />
+                Matériel réservé
+              </h3>
+              {selectedReservation.matos.length > 0 ? (
+                <ul className="space-y-2">
+                  {selectedReservation.matos.map((item, index) => (
+                    <li
+                      key={`${item.name}-${index}`}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-background/70 px-4 py-3 text-sm"
+                    >
+                      <span className="break-words">{item.name}</span>
+                      <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">
+                        × {item.quantity}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="rounded-xl border border-dashed border-border/70 px-4 py-3 text-sm text-muted-foreground">
+                  Aucun matériel associé à cette réservation.
+                </p>
+              )}
+            </section>
+          </div>
+        </aside>
+      </div>
+    )}
+    </>
   );
 }
