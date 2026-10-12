@@ -114,14 +114,14 @@ export default async function Home({ searchParams }: PageProps) {
         <div className="w-full min-w-0">
           {/* ONGLET 1 : RÉSERVATIONS */}
           {tab === "resas" && (
-            <div className="flex w-full min-w-0 flex-col gap-6 animate-in fade-in duration-300">  
+            <div className="flex w-full min-w-0 flex-col gap-6">
               <Reservations_tab />
             </div>
           )}
 
           {/* ONGLET 2 : MATÉRIEL */}
           {tab === "matos" && isAdmin && (
-            <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+            <div className="flex flex-col gap-6 w-full">
               <BoutonAddMatos categories={CATEGORIES} />
               <Matos_tab />
             </div>
@@ -129,7 +129,7 @@ export default async function Home({ searchParams }: PageProps) {
 
           {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
           {showReservations && (
-            <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
+            <div className="grid w-full grid-cols-1 items-start gap-8 lg:grid-cols-2">
               <BoutonAddResa matosList={allMatos} categories={CATEGORIES} />
               <MesReservations_tab matosList={allMatos} />
             </div>
