@@ -60,7 +60,7 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
           </div>
 
-          <nav className={`grid w-full max-w-xl gap-1 rounded-2xl border border-border/70 bg-secondary/75 p-1 text-center lg:w-auto ${isAdmin ? "grid-cols-3" : "grid-cols-2"}`}>
+          <nav className="grid w-full max-w-xl grid-cols-3 gap-1 rounded-2xl border border-border/70 bg-secondary/75 p-1 text-center lg:w-auto">
             <Link
               href="/?tab=resas"
               className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
@@ -81,7 +81,6 @@ export default async function Home({ searchParams }: PageProps) {
             >
               Réservations
             </Link>
-            {isAdmin && (
             <Link
               href="/?tab=matos"
               className={`rounded-xl px-3 py-2.5 text-xs font-bold transition-all sm:text-sm ${
@@ -92,7 +91,6 @@ export default async function Home({ searchParams }: PageProps) {
             >
               Le matos
             </Link>
-            )}
           </nav>
 
           <div className="flex items-center gap-3 lg:justify-self-end">
@@ -120,9 +118,9 @@ export default async function Home({ searchParams }: PageProps) {
           )}
 
           {/* ONGLET 2 : MATÉRIEL */}
-          {tab === "matos" && isAdmin && (
+          {tab === "matos" && (
             <div className="flex flex-col gap-6 w-full">
-              <BoutonAddMatos categories={CATEGORIES} />
+              {isAdmin && <BoutonAddMatos categories={CATEGORIES} />}
               <Matos_tab />
             </div>
           )}
