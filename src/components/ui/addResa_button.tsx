@@ -297,7 +297,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
 
             {/* Les catégories permettent d'afficher toute la liste correspondante sans terme de recherche. */}
             {isFocused && hasValidDateRange && (searchQuery.trim().length > 0 || categorie !== "") && (
-              <div className="asso-options absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
+              <div className="asso-options mt-1 max-h-48 w-full overflow-y-auto rounded-md border p-1 shadow-lg">
                 {availableMatos.length > 0 ? (
                   availableMatos.map((item) => {
                     const isUnavailable = unavailableMatosIds.includes(item.id);
