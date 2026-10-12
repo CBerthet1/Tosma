@@ -1,9 +1,9 @@
 'use server';
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
-import { matosTable, resaTable, resaMatosTable } from "../../drizzle/schema";
+import { matosTable, resaTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
-import { and, eq, gt, inArray, lt } from "drizzle-orm";
+import { and, gt, inArray, lt } from "drizzle-orm";
 
 export async function getUnavailableMatosIds(start: Date, end: Date) {
   if (
@@ -26,20 +26,20 @@ export async function getUnavailableMatosIds(start: Date, end: Date) {
       .from(matosTable),
     db
       .select({
-        matosId: resaMatosTable.matosId,
-        quantity: resaMatosTable.quantity,
+        matos: resaTable.matos,
       })
-      .from(resaMatosTable)
-      .innerJoin(resaTable, eq(resaMatosTable.resaId, resaTable.id))
+      .from(resaTable)
       .where(and(lt(resaTable.start, end), gt(resaTable.end, start))),
   ]);
 
   const reservedByMatos = new Map<number, number>();
   for (const reservation of reservations) {
-    reservedByMatos.set(
-      reservation.matosId,
-      (reservedByMatos.get(reservation.matosId) ?? 0) + reservation.quantity,
-    );
+    for (const item of reservation.matos) {
+      reservedByMatos.set(
+        item.matosId,
+        (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
+      );
+    }
   }
 
   return materials
@@ -95,25 +95,13 @@ export async function newResa(
       }
     }
 
-    // 1. Insertion de la réservation 
-    const [result] = await tx.insert(resaTable).values({
+    await tx.insert(resaTable).values({
       name: normalizedName,
       start: start,
       end: end,
       user: userId,
+      matos: matosIds.map((matosId) => ({ matosId, quantity: 1 })),
     });
-
-    const newResaId = result.insertId;
-
-    // 2. Insertion des matériels liés (si au moins un matériel est sélectionné)
-    if (matosIds && matosIds.length > 0) {
-      const links = matosIds.map((matosId) => ({
-        resaId: newResaId,
-        matosId: matosId,
-      }));
-
-      await tx.insert(resaMatosTable).values(links);
-    }
   });
 
   revalidatePath("/");

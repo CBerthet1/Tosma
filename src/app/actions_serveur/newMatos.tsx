@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
+import { CATEGORIES } from "@/lib/categories";
 
 export async function newMatos(name: string, categorie: string) {
   const session = await auth();
@@ -15,8 +16,7 @@ export async function newMatos(name: string, categorie: string) {
   if (
     !normalizedName ||
     normalizedName.length > 255 ||
-    !normalizedCategorie ||
-    normalizedCategorie.length > 255
+    !CATEGORIES.some((category) => category === normalizedCategorie)
   ) {
     throw new Error("Nom ou catégorie invalide.");
   }

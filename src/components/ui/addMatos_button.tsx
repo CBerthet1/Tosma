@@ -1,16 +1,13 @@
 'use client';
 import {newMatos} from "../../app/actions_serveur/newMatos";
+import type { Category } from "@/lib/categories";
 
 
 
 
 import { useState } from "react";
 
-type Category = {
-  categorie: string;
-};
-
-export function BoutonAddMatos({ categories }: { categories: Category[] }) {
+export function BoutonAddMatos({ categories }: { categories: readonly Category[] }) {
  
   const [name, setName] = useState("");
   const [categorie, setCategorie] = useState("");
@@ -86,7 +83,7 @@ export function BoutonAddMatos({ categories }: { categories: Category[] }) {
             >
               <option value="" disabled>Sélectionnez une option</option>
               {categories.map((category) => (
-                <option key={category.categorie} value={category.categorie}>{category.categorie}</option>
+                <option key={category} value={category}>{category}</option>
               ))}
             </select>
           </div>

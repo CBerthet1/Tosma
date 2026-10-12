@@ -5,7 +5,8 @@ import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import MesReservations_tab from "@/app/actions_serveur/MesReservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
 import { logout } from "@/app/actions_serveur/logout";
-import { categoriesTable, matosTable } from "../drizzle/schema";
+import { matosTable } from "../drizzle/schema";
+import { CATEGORIES } from "@/lib/categories";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 import { Button } from "@/components/ui/button";
@@ -31,20 +32,13 @@ export default async function Home({ searchParams }: PageProps) {
     tab === "reservations" ||
     tab === "Nouvelle-Réservation" ||
     tab === "mes-reservations";
-  const [allMatos, categories] = await Promise.all([
-    showReservations
-      ? db.select({
-          id: matosTable.id,
-          name: matosTable.name,
-          categorie: matosTable.categorie,
-        }).from(matosTable)
-      : Promise.resolve([]),
-    showReservations || (isAdmin && tab === "matos")
-      ? db.select({
-          categorie: categoriesTable.categorie,
-        }).from(categoriesTable)
-      : Promise.resolve([]),
-  ]);
+  const allMatos = showReservations
+    ? await db.select({
+        id: matosTable.id,
+        name: matosTable.name,
+        categorie: matosTable.categorie,
+      }).from(matosTable)
+    : [];
 
   return (
     <div className="flex flex-col flex-1 min-h-screen font-sans bg-background text-foreground">
@@ -128,7 +122,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET 2 : MATÉRIEL */}
           {tab === "matos" && isAdmin && (
             <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-              <BoutonAddMatos categories={categories} />
+              <BoutonAddMatos categories={CATEGORIES} />
               <Matos_tab />
             </div>
           )}
@@ -136,7 +130,7 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET : CRÉER ET MODIFIER LES RÉSERVATIONS */}
           {showReservations && (
             <div className="grid w-full grid-cols-1 items-start gap-8 animate-in fade-in duration-300 lg:grid-cols-2">
-              <BoutonAddResa matosList={allMatos} categories={categories} />
+              <BoutonAddResa matosList={allMatos} categories={CATEGORIES} />
               <MesReservations_tab matosList={allMatos} />
             </div>
           )}

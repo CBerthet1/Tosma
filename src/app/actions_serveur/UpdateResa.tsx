@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
-import { matosTable, resaMatosTable, resaTable } from "../../drizzle/schema";
+import { matosTable, resaTable } from "../../drizzle/schema";
 import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -67,14 +67,11 @@ export async function updateResa(
 
       const overlappingReservations = await tx
         .select({
-          matosId: resaMatosTable.matosId,
-          quantity: resaMatosTable.quantity,
+          matos: resaTable.matos,
         })
-        .from(resaMatosTable)
-        .innerJoin(resaTable, eq(resaMatosTable.resaId, resaTable.id))
+        .from(resaTable)
         .where(
           and(
-            inArray(resaMatosTable.matosId, matosIds),
             lt(resaTable.start, end),
             gt(resaTable.end, start),
             ne(resaTable.id, id),
@@ -83,10 +80,14 @@ export async function updateResa(
 
       const reservedByMatos = new Map<number, number>();
       for (const reservation of overlappingReservations) {
-        reservedByMatos.set(
-          reservation.matosId,
-          (reservedByMatos.get(reservation.matosId) ?? 0) + reservation.quantity,
-        );
+        for (const item of reservation.matos) {
+          if (matosIds.includes(item.matosId)) {
+            reservedByMatos.set(
+              item.matosId,
+              (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
+            );
+          }
+        }
       }
 
       if (
@@ -101,15 +102,13 @@ export async function updateResa(
 
     await tx
       .update(resaTable)
-      .set({ name: normalizedName, start, end })
+      .set({
+        name: normalizedName,
+        start,
+        end,
+        matos: matosIds.map((matosId) => ({ matosId, quantity: 1 })),
+      })
       .where(and(eq(resaTable.id, id), eq(resaTable.user, userId)));
-    await tx.delete(resaMatosTable).where(eq(resaMatosTable.resaId, id));
-
-    if (matosIds.length > 0) {
-      await tx.insert(resaMatosTable).values(
-        matosIds.map((matosId) => ({ resaId: id, matosId })),
-      );
-    }
   });
 
   revalidatePath("/");

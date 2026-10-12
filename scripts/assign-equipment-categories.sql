@@ -1,17 +1,6 @@
 -- Run after migrate-categories-to-text.sql.
--- Names not listed below (for example, temporary or newly added equipment) are unchanged.
+-- Names not listed below (for example, newly added equipment) stay in "Autre".
 SET NAMES utf8mb4;
-
-INSERT IGNORE INTO `categories` (`categorie`) VALUES
-  ('Réj'),
-  ('Autre'),
-  ('Objo'),
-  ('stab'),
-  ('light'),
-  ('accessoire'),
-  ('son'),
-  ('batterie'),
-  ('Caméra');
 
 UPDATE `materiel`
 SET `categorie` = CASE TRIM(`name`)
@@ -176,3 +165,7 @@ WHERE TRIM(`name`) IN (
   'DJI Osmo Pocket 2', 'DJI Osmo Pocket 3', 'EVA-1', 'FX-3', 'FX-30',
   'GH5s', 'GoPro Hero 7', 'GoPro Hero 9', 'NNXD', 'NXD+', 'NXD-', 'Tess'
 );
+
+UPDATE `materiel`
+SET `categorie` = 'Autre'
+WHERE `categorie` = 'temp';

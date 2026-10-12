@@ -1,9 +1,9 @@
 'use server'; // Ce composant est côté serveur
 
 import { db } from "../../drizzle/db";
-import { matosTable, resaMatosTable, resaTable } from "../../drizzle/schema";
+import { matosTable, resaTable } from "../../drizzle/schema";
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa"; 
-import { eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 
 const RESERVATION_COLORS = [
   "#b08d55", // Amber (Moutarde grisée)
@@ -38,41 +38,35 @@ export default async function Reservations_tab() {
       start: resaTable.start,
       end: resaTable.end,
       user: resaTable.user,
-      matosId: resaMatosTable.matosId,
-      matosName: matosTable.name,
-      matosQuantity: resaMatosTable.quantity,
+      matos: resaTable.matos,
     })
-    .from(resaTable)
-    .leftJoin(resaMatosTable, eq(resaTable.id, resaMatosTable.resaId))
-    .leftJoin(matosTable, eq(resaMatosTable.matosId, matosTable.id));
+    .from(resaTable);
 
-  const eventsById = new Map<number, Reservation>();
-  for (const row of rows) {
-    let event = eventsById.get(row.id);
-    if (!event) {
-      event = {
-        id: row.id,
-        title: row.title ?? "Réservation sans nom",
-        start: new Date(row.start),
-        end: new Date(row.end),
-        reservedBy: row.user,
-        matos: [],
-        color: getStringColor(row.id),
-      };
-      eventsById.set(row.id, event);
-    }
-
-    if (row.matosId !== null) {
-      event.matos.push({
-        name: row.matosName ?? "Matériel sans nom",
-        quantity: row.matosQuantity ?? 1,
-      });
-    }
-  }
+  const matosIds = [...new Set(rows.flatMap((row) => row.matos.map((item) => item.matosId)))];
+  const materials = matosIds.length > 0
+    ? await db
+        .select({ id: matosTable.id, name: matosTable.name })
+        .from(matosTable)
+        .where(inArray(matosTable.id, matosIds))
+    : [];
+  const materialsById = new Map(materials.map((material) => [material.id, material]));
 
   return (
     <div className="w-full h-full flex flex-col">
-      <CalendrierResa reservations={[...eventsById.values()]} />
+      <CalendrierResa
+        reservations={rows.map((row): Reservation => ({
+          id: row.id,
+          title: row.title ?? "Réservation sans nom",
+          start: new Date(row.start),
+          end: new Date(row.end),
+          reservedBy: row.user,
+          matos: row.matos.map((item) => ({
+            name: materialsById.get(item.matosId)?.name ?? "Matériel sans nom",
+            quantity: item.quantity,
+          })),
+          color: getStringColor(row.id),
+        }))}
+      />
     </div>
   );
 }

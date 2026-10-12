@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getUnavailableMatosIds, newResa } from "../../app/actions_serveur/newResa";
 import { CalendarPlus2, Package, Search, X } from "lucide-react";
+import type { Category } from "@/lib/categories";
 
 // Génère les créneaux horaires
 const generateTimeSlots = () => {
@@ -26,13 +27,9 @@ type Matos = {
   categorie: string;
 };
 
-type Category = {
-  categorie: string;
-};
-
 interface BoutonAddResaProps {
   matosList?: Matos[]; // Passer la liste des matériels depuis le serveur ou le parent
-  categories: Category[];
+  categories: readonly Category[];
 }
 
 export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps) {
@@ -293,7 +290,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               >
                 <option value="">Catégories</option>
                 {categories.map((category) => (
-                  <option key={category.categorie} value={category.categorie}>{category.categorie}</option>
+                  <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>

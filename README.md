@@ -37,20 +37,14 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Connexion à la base existante
 
-La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `categories` et `image`.
+La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Les catégories proposées par l'application sont définies en dur dans `src/lib/categories.ts` ; aucune table de catégories n'est nécessaire. La colonne `materiel.categorie` conserve la catégorie de chaque matériel.
 
-Pour convertir la base existante, exécutez une seule fois `scripts/migrate-categories-to-text.sql` avant de déployer l'application. Le script attribue la catégorie texte `temp` aux matériels déjà enregistrés, crée la table `categories` avec cette valeur, puis supprime l'ancienne colonne numérique `category_id`.
+Pour convertir une ancienne base, exécutez une seule fois `scripts/migrate-categories-to-text.sql`, puis `scripts/assign-equipment-categories.sql`. Les matériels non répertoriés dans le script de classement restent dans `Autre`.
 
-Après cette migration, exécutez `scripts/assign-equipment-categories.sql` pour créer les catégories fournies et classer les matériels correspondants. Les matériels dont le nom n'est pas dans la liste restent dans leur catégorie actuelle.
+Si la conversion vers la colonne texte est déjà faite, exécutez une seule fois `scripts/remove-category-tables.sql` sur la base existante. Ce script remplace les catégories `temp` par `Autre` et supprime les tables `category`, `categorie` et `categories` si elles existent.
 
-Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.
+Pour fusionner les réservations et leurs matériels, exécutez une seule fois `scripts/merge-resa-matos.sql` sur la base existante avant de déployer le code mis à jour. Le script conserve les réservations et leurs quantités dans la colonne JSON `resa.matos`, puis supprime `resa_matos`. Faites une sauvegarde de la base avant d'exécuter la migration.
 
-## Connexion à la base existante
-
-La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `categories` et `image`.
-
-Pour convertir la base existante, exécutez une seule fois `scripts/migrate-categories-to-text.sql` avant de déployer l'application. Le script attribue la catégorie texte `temp` aux matériels déjà enregistrés, crée la table `categories` avec cette valeur, puis supprime l'ancienne colonne numérique `category_id`.
-
-Après cette migration, exécutez `scripts/assign-equipment-categories.sql` pour créer les catégories fournies et classer les matériels correspondants. Les matériels dont le nom n'est pas dans la liste restent dans leur catégorie actuelle.
+Pour intégrer la table `image` à `materiel`, exécutez une seule fois `scripts/merge-image-into-materiel.sql` avant de déployer le code mis à jour. L'URL est transférée dans `materiel.image`; lorsqu'un matériel a plusieurs images, celle dont l'identifiant est le plus petit est conservée. Le script supprime ensuite la table `image`. Faites une sauvegarde de la base avant d'exécuter la migration.
 
 Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.

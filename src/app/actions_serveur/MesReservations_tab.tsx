@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
-import { resaMatosTable, resaTable } from "../../drizzle/schema";
+import { resaTable } from "../../drizzle/schema";
 import { and, eq, gt } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
 
@@ -27,35 +27,21 @@ export default async function MesReservations_tab({
       start: resaTable.start,
       end: resaTable.end,
       userId: resaTable.user,
-      matosId: resaMatosTable.matosId,
+      matos: resaTable.matos,
     })
     .from(resaTable)
-    .leftJoin(resaMatosTable, eq(resaTable.id, resaMatosTable.resaId))
     .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
 
-  const reservationsById = new Map<number, ReservationToEdit>();
-  for (const row of rows) {
-    let reservation = reservationsById.get(row.id);
-    if (!reservation) {
-      reservation = {
+  return (
+    <MesReservations
+      reservations={rows.map((row): ReservationToEdit => ({
         id: row.id,
         name: row.name ?? "",
         start: row.start,
         end: row.end,
-        matosIds: [],
+        matosIds: row.matos.map((item) => item.matosId),
         userId: row.userId,
-      };
-      reservationsById.set(row.id, reservation);
-    }
-
-    if (row.matosId !== null) {
-      reservation.matosIds.push(row.matosId);
-    }
-  }
-
-  return (
-    <MesReservations
-      reservations={[...reservationsById.values()]}
+      }))}
       matosList={matosList}
       currentUserId={session.user.id}
     />
