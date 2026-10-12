@@ -43,6 +43,8 @@ Pour convertir une ancienne base, exécutez une seule fois `scripts/migrate-cate
 
 Si la conversion vers la colonne texte est déjà faite, exécutez une seule fois `scripts/remove-category-tables.sql` sur la base existante. Ce script remplace les catégories `temp` par `Autre` et supprime les tables `category`, `categorie` et `categories` si elles existent.
 
+Pour uniformiser la majuscule des catégories dans une base déjà utilisée, exécutez une seule fois `scripts/capitalize-categories.sql`. L'ordre d'affichage du matériel est défini dans le code : `Accessoire` apparaît avant-dernier et `Autre` en dernier.
+
 Pour fusionner les réservations et leurs matériels, exécutez une seule fois `scripts/merge-resa-matos.sql` sur la base existante avant de déployer le code mis à jour. Le script conserve les réservations et leurs quantités dans la colonne JSON `resa.matos`, puis supprime `resa_matos`. Faites une sauvegarde de la base avant d'exécuter la migration.
 
 Pour intégrer la table `image` à `materiel`, exécutez une seule fois `scripts/merge-image-into-materiel.sql` avant de déployer le code mis à jour. L'URL est transférée dans `materiel.image`; lorsqu'un matériel a plusieurs images, celle dont l'identifiant est le plus petit est conservée. Le script supprime ensuite la table `image`. Faites une sauvegarde de la base avant d'exécuter la migration.
