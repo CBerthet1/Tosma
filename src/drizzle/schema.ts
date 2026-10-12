@@ -3,23 +3,14 @@ import {
   int,
   mysqlTable,
   text,
-  timestamp,
   tinyint,
-  uniqueIndex,
   varchar,
 } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 
-export const categoryTable = mysqlTable(
-  'category',
-  {
-    id: int('id').autoincrement().primaryKey(),
-    name: varchar('name', { length: 255 }).notNull(),
-  },
-  (table) => ({
-    nameUnique: uniqueIndex('category_name_unique').on(table.name),
-  }),
-);
+export const categoriesTable = mysqlTable('categories', {
+  categorie: varchar('categorie', { length: 255 }).primaryKey(),
+});
 
 export const resaTable = mysqlTable('resa', {
   id: int('id').autoincrement().primaryKey(),
@@ -34,7 +25,7 @@ export const matosTable = mysqlTable('materiel', {
   name: varchar('name', { length: 255 }),
   description: text('description'),
   available: tinyint('available').notNull().default(1),
-  categoryId: int('category_id').notNull().default(1),
+  categorie: varchar('categorie', { length: 255 }).notNull(),
   addedDate: datetime('added_date').notNull().default(sql`CURRENT_TIMESTAMP`),
   quantity: int('quantity').notNull().default(1),
 });
@@ -48,12 +39,6 @@ export const resaMatosTable = mysqlTable(
     quantity: int('quantity').notNull().default(1),
   },
 );
-
-export const sessionTable = mysqlTable('session', {
-  id: varchar('id', { length: 63 }).primaryKey(),
-  user: varchar('user', { length: 63 }).notNull(),
-  expires: timestamp('expires'),
-});
 
 export const imageTable = mysqlTable('image', {
   id: int('id').autoincrement().primaryKey(),

@@ -5,7 +5,7 @@ import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import MesReservations_tab from "@/app/actions_serveur/MesReservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
 import { logout } from "@/app/actions_serveur/logout";
-import { categoryTable, matosTable } from "../drizzle/schema";
+import { categoriesTable, matosTable } from "../drizzle/schema";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";
 import { Button } from "@/components/ui/button";
@@ -36,14 +36,13 @@ export default async function Home({ searchParams }: PageProps) {
       ? db.select({
           id: matosTable.id,
           name: matosTable.name,
-          categoryId: matosTable.categoryId,
+          categorie: matosTable.categorie,
         }).from(matosTable)
       : Promise.resolve([]),
     showReservations || (isAdmin && tab === "matos")
       ? db.select({
-          id: categoryTable.id,
-          name: categoryTable.name,
-        }).from(categoryTable)
+          categorie: categoriesTable.categorie,
+        }).from(categoriesTable)
       : Promise.resolve([]),
   ]);
 

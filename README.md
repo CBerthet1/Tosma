@@ -37,16 +37,20 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Connexion à la base existante
 
-La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `session` et `image`.
+La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `categories` et `image`.
 
-La table `materiel` stocke un identifiant `category_id`. Exécutez une fois `scripts/create-category-table.sql` sur la base cible pour créer et initialiser la table `category` utilisée par le formulaire. Ce script ne modifie pas les tables existantes.
+Pour convertir la base existante, exécutez une seule fois `scripts/migrate-categories-to-text.sql` avant de déployer l'application. Le script attribue la catégorie texte `temp` aux matériels déjà enregistrés, crée la table `categories` avec cette valeur, puis supprime l'ancienne colonne numérique `category_id`.
+
+Après cette migration, exécutez `scripts/assign-equipment-categories.sql` pour créer les catégories fournies et classer les matériels correspondants. Les matériels dont le nom n'est pas dans la liste restent dans leur catégorie actuelle.
 
 Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.
 
 ## Connexion à la base existante
 
-La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `session` et `image`.
+La connexion MySQL utilise la variable d'environnement `DATABASE_URL`. Le schéma Drizzle dans `src/drizzle/schema.ts` correspond aux tables `materiel`, `resa`, `resa_matos`, `categories` et `image`.
 
-La table `materiel` stocke un identifiant `category_id`. Exécutez une fois `scripts/create-category-table.sql` sur la base cible pour créer et initialiser la table `category` utilisée par le formulaire. Ce script ne modifie pas les tables existantes.
+Pour convertir la base existante, exécutez une seule fois `scripts/migrate-categories-to-text.sql` avant de déployer l'application. Le script attribue la catégorie texte `temp` aux matériels déjà enregistrés, crée la table `categories` avec cette valeur, puis supprime l'ancienne colonne numérique `category_id`.
+
+Après cette migration, exécutez `scripts/assign-equipment-categories.sql` pour créer les catégories fournies et classer les matériels correspondants. Les matériels dont le nom n'est pas dans la liste restent dans leur catégorie actuelle.
 
 Les migrations Drizzle historiques du projet décrivent un autre schéma. Ne les appliquez pas à cette base préexistante.

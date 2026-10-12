@@ -7,14 +7,13 @@ import {newMatos} from "../../app/actions_serveur/newMatos";
 import { useState } from "react";
 
 type Category = {
-  id: number;
-  name: string;
+  categorie: string;
 };
 
 export function BoutonAddMatos({ categories }: { categories: Category[] }) {
  
   const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [categorie, setCategorie] = useState("");
   const [loading, setLoading] = useState(false); // gère l'état de chargement du bouton quand on soumet le formulaire
 
 
@@ -23,11 +22,11 @@ export function BoutonAddMatos({ categories }: { categories: Category[] }) {
       
 
       // Envoi vers le serveur
-      await newMatos(name, Number(categoryId));
+      await newMatos(name, categorie);
 
       // Remise à zéro des champs
       setName("");
-      setCategoryId("");
+      setCategorie("");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement :", error);
     } finally {
@@ -80,14 +79,14 @@ export function BoutonAddMatos({ categories }: { categories: Category[] }) {
             </label>
             <select
               id="res-category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              value={categorie}
+              onChange={(e) => setCategorie(e.target.value)}
               required
               className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300 appearance-none"
             >
               <option value="" disabled>Sélectionnez une option</option>
               {categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
+                <option key={category.categorie} value={category.categorie}>{category.categorie}</option>
               ))}
             </select>
           </div>
