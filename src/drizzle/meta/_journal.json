@@ -43,6 +43,13 @@
       "when": 1790770344920,
       "tag": "0005_perpetual_stryfe",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1791902940000,
+      "tag": "0006_add_resa_user_display_name",
+      "breakpoints": true
     }
   ]
 }
