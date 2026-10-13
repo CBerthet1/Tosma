@@ -43,6 +43,13 @@
       "when": 1790770344920,
       "tag": "0005_perpetual_stryfe",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1791894741223,
+      "tag": "0006_smiling_black_bolt",
+      "breakpoints": true
     }
   ]
 }
