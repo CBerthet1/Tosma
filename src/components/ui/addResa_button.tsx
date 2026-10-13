@@ -158,6 +158,10 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const [endTime, setEndTime] = useState("09:15");
   const startDatePickerRef = useRef<HTMLInputElement>(null);
   const endDatePickerRef = useRef<HTMLInputElement>(null);
+  const activeDatePickerRef = useRef<{
+    input: HTMLInputElement;
+    trigger: HTMLButtonElement;
+  } | null>(null);
 
   const [name, setName] = useState("");
   
@@ -179,6 +183,29 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
     { length: 10 },
     (_, index) => initialDate.getFullYear() + index,
   );
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const activePicker = activeDatePickerRef.current;
+      if (
+        activePicker &&
+        event.target instanceof Node &&
+        !activePicker.trigger.contains(event.target)
+      ) {
+        activeDatePickerRef.current = null;
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") activeDatePickerRef.current = null;
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const startDate = getDateValue(startDay, startMonth, startYear);
   const endDate = getDateValue(endDay, endMonth, endYear);
@@ -280,14 +307,25 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
     });
   };
 
-  const openDatePicker = (input: HTMLInputElement | null) => {
+  const toggleDatePicker = (
+    input: HTMLInputElement | null,
+    trigger: HTMLButtonElement,
+  ) => {
     if (!input) return;
+    if (activeDatePickerRef.current?.input === input) {
+      input.blur();
+      activeDatePickerRef.current = null;
+      return;
+    }
+
+    activeDatePickerRef.current?.input.blur();
+    input.focus();
     if (typeof input.showPicker === "function") {
       input.showPicker();
     } else {
-      input.focus();
       input.click();
     }
+    activeDatePickerRef.current = { input, trigger };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -378,42 +416,42 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               >
                 Début
               </label>
-              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+              <div className="flex min-w-0 items-center gap-1.5">
                 <button
                   type="button"
                   aria-label="Ouvrir le calendrier pour la date de début"
-                  onClick={() => openDatePicker(startDatePickerRef.current)}
+                  onClick={(event) => toggleDatePicker(startDatePickerRef.current, event.currentTarget)}
                   className="inline-flex size-8 items-center justify-center rounded-lg border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 >
                   <CalendarDays className="size-4" aria-hidden="true" />
                 </button>
-                <label className="sr-only" htmlFor="res-start-day-select">Jour de début</label>
-                <select
-                  id="res-start-day-select"
-                  aria-label="Jour de début"
-                  value={startDay}
-                  onChange={(event) => {
-                    const day = Number(event.target.value);
-                    const month = adjustStartMonth(
-                      day,
-                      startMonth,
-                      startYear,
-                      new Date(),
-                    );
-                    const year =
-                      getNextStartYear(day, month, startYear, new Date()) ?? startYear;
-                    setStartMonth(month);
-                    setStartDay(Math.min(day, getDaysInMonth(month)));
-                    setStartYear(year);
-                    setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
-                  }}
-                  className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                >
-                  {Array.from({ length: getDaysInMonth(startMonth) }, (_, index) => index + 1).map((day) => (
-                    <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
-                  ))}
-                </select>
-                <div className="col-start-2 flex min-w-0 items-center gap-1.5">
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                  <label className="sr-only" htmlFor="res-start-day-select">Jour de début</label>
+                  <select
+                    id="res-start-day-select"
+                    aria-label="Jour de début"
+                    value={startDay}
+                    onChange={(event) => {
+                      const day = Number(event.target.value);
+                      const month = adjustStartMonth(
+                        day,
+                        startMonth,
+                        startYear,
+                        new Date(),
+                      );
+                      const year =
+                        getNextStartYear(day, month, startYear, new Date()) ?? startYear;
+                      setStartMonth(month);
+                      setStartDay(Math.min(day, getDaysInMonth(month)));
+                      setStartYear(year);
+                      setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
+                    }}
+                    className="w-[3.5rem] shrink-0 rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {Array.from({ length: getDaysInMonth(startMonth) }, (_, index) => index + 1).map((day) => (
+                      <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
+                    ))}
+                  </select>
                   <label className="sr-only" htmlFor="res-start-month">Mois de début</label>
                   <select
                     id="res-start-month"
@@ -490,42 +528,42 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               >
                 Fin
               </label>
-              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-1.5">
+              <div className="flex min-w-0 items-center gap-1.5">
                 <button
                   type="button"
                   aria-label="Ouvrir le calendrier pour la date de fin"
-                  onClick={() => openDatePicker(endDatePickerRef.current)}
+                  onClick={(event) => toggleDatePicker(endDatePickerRef.current, event.currentTarget)}
                   className="inline-flex size-8 items-center justify-center rounded-lg border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 >
                   <CalendarDays className="size-4" aria-hidden="true" />
                 </button>
-                <label className="sr-only" htmlFor="res-end-day-select">Jour de fin</label>
-                <select
-                  id="res-end-day-select"
-                  aria-label="Jour de fin"
-                  value={endDay}
-                  onChange={(event) => {
-                    const day = Number(event.target.value);
-                    const month = adjustEndMonth(day, endMonth, startDate, startTime, endTime, endYear);
-                    const year = getNextEndYear(
-                      day,
-                      month,
-                      endYear,
-                      startDate,
-                      startTime,
-                      endTime,
-                    );
-                    setEndMonth(month);
-                    setEndDay(Math.min(day, getDaysInMonth(month)));
-                    if (year !== null) setEndYear(year);
-                  }}
-                  className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                >
-                  {Array.from({ length: getDaysInMonth(endMonth) }, (_, index) => index + 1).map((day) => (
-                    <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
-                  ))}
-                </select>
-                <div className="col-start-2 flex min-w-0 items-center gap-1.5">
+                <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                  <label className="sr-only" htmlFor="res-end-day-select">Jour de fin</label>
+                  <select
+                    id="res-end-day-select"
+                    aria-label="Jour de fin"
+                    value={endDay}
+                    onChange={(event) => {
+                      const day = Number(event.target.value);
+                      const month = adjustEndMonth(day, endMonth, startDate, startTime, endTime, endYear);
+                      const year = getNextEndYear(
+                        day,
+                        month,
+                        endYear,
+                        startDate,
+                        startTime,
+                        endTime,
+                      );
+                      setEndMonth(month);
+                      setEndDay(Math.min(day, getDaysInMonth(month)));
+                      if (year !== null) setEndYear(year);
+                    }}
+                    className="w-[3.5rem] shrink-0 rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {Array.from({ length: getDaysInMonth(endMonth) }, (_, index) => index + 1).map((day) => (
+                      <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
+                    ))}
+                  </select>
                   <label className="sr-only" htmlFor="res-end-month">Mois de fin</label>
                   <select
                     id="res-end-month"
