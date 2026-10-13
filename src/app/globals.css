@@ -198,7 +198,6 @@
 .asso-form button[type="button"] {
   border-color: var(--border);
   border-radius: 0.75rem;
-  color: var(--muted-foreground);
 }
 
 .asso-form button[type="button"]:hover {

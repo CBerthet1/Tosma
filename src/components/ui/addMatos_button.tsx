@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { newMatos } from "@/app/actions_serveur/newMatos";
 import type { Category } from "@/lib/categories";
+import { SuccessToast } from "@/components/ui/success-toast";
 
 const initialValues = {
   name: "",
@@ -17,13 +18,13 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
   const [values, setValues] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
+    setSuccessMessage(null);
 
     try {
       await newMatos({
@@ -31,7 +32,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
         quantity: Number(values.quantity),
       });
       setValues(initialValues);
-      setSuccess("Le matériel a été ajouté.");
+      setSuccessMessage("Matériel enregistré.");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -151,9 +152,9 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
           </label>
         </div>
 
-        {(error || success) && (
-          <p role={error ? "alert" : "status"} className={`text-sm ${error ? "text-destructive" : "text-green-700 dark:text-green-400"}`}>
-            {error || success}
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
           </p>
         )}
 
@@ -167,6 +168,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
           </button>
         </div>
       </form>
+      {successMessage && <SuccessToast message={successMessage} />}
     </section>
   );
 }

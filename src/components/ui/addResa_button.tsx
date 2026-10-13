@@ -5,6 +5,7 @@ import { getAvailableMatosQuantities, newResa } from "../../app/actions_serveur/
 import { CalendarDays, CalendarPlus2, Package, Search, X } from "lucide-react";
 import type { Category } from "@/lib/categories";
 import { getDateAfterMonths } from "@/lib/reservation-dates";
+import { SuccessToast } from "@/components/ui/success-toast";
 
 // Génère les créneaux horaires
 const generateTimeSlots = () => {
@@ -175,6 +176,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
@@ -228,6 +230,15 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
       start < end &&
       isWithinElevenMonths,
   );
+  const dateError =
+    !startDate || !endDate || !start || !end ||
+    Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())
+      ? "Veuillez sélectionner une date de début et une date de fin valides."
+      : start >= end
+        ? "La date et l'heure de fin doivent être postérieures à celles du début."
+        : latestEnd && end > latestEnd
+          ? "La réservation ne peut pas dépasser 11 mois."
+          : "";
   const availabilityKey = `${startDate}T${startTime}/${endDate}T${endTime}`;
   const hasCurrentAvailability = availabilityResult?.key === availabilityKey;
   const availableQuantities =
@@ -332,6 +343,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
     e.preventDefault();
     setLoading(true);
     setErrorMessage("");
+    setSuccessMessage(null);
 
     try {
       // 2. Fusion exacte de la date et de l'heure
@@ -365,6 +377,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
       setEndMonth(today.getMonth() + 1);
       setEndYear(today.getFullYear());
       setSelectedMatos({});
+      setSuccessMessage("Réservation enregistrée.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "La réservation n'a pas pu être créée.");
     } finally {
@@ -647,10 +660,11 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               </select>
             </div>
           </div>
-          {startDate && (!endDate || !isWithinElevenMonths) && (
-            <p role="alert" className="text-xs text-destructive">
-              La réservation ne peut pas dépasser 11 mois. Vérifiez les dates.
-            </p>
+          {dateError && (
+            <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+              <p className="font-semibold">Dates invalides</p>
+              <p>{dateError}</p>
+            </div>
           )}
 
           {/* 4. Sélection du matériel avec champ de recherche */}
@@ -759,7 +773,9 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
                   return (
                     <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border/70 px-3 py-2">
                       <span className="min-w-0 flex-1 break-words text-sm font-medium">
-                        {item.name ?? "Matériel sans nom"}
+                        <span className={remaining > 0 ? "text-foreground" : "text-muted-foreground"}>
+                          {item.name ?? "Matériel sans nom"}
+                        </span>
                         <span className="ml-2 text-xs text-muted-foreground">
                           {remaining} disponible(s)
                         </span>
@@ -829,6 +845,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
         </div>
 
       </form>
+      {successMessage && <SuccessToast message={successMessage} />}
     </div>
   );
 }

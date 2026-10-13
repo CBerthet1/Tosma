@@ -6,6 +6,7 @@ import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { Button } from "@/components/ui/button";
 import { CalendarClock, CalendarDays, Package, PencilLine, Search, X } from "lucide-react";
 import type { ReservationMaterial } from "@/drizzle/schema";
+import { SuccessToast } from "@/components/ui/success-toast";
 
 export type ReservationToEdit = {
   id: number;
@@ -50,6 +51,7 @@ export default function MesReservations({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -154,6 +156,7 @@ export default function MesReservations({
   ) => {
     event.preventDefault();
     setError("");
+    setSuccessMessage(null);
     setLoadingId(reservation.id);
 
     const formData = new FormData(event.currentTarget);
@@ -171,6 +174,7 @@ export default function MesReservations({
       setEditingId(null);
       setSelectedMatos({});
       setSearchQuery("");
+      setSuccessMessage("Réservation modifiée.");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "La modification a échoué.");
     } finally {
@@ -196,6 +200,7 @@ export default function MesReservations({
             Vos prochaines réservations apparaîtront ici.
           </p>
         </div>
+        {successMessage && <SuccessToast message={successMessage} />}
       </section>
     );
   }
@@ -487,6 +492,7 @@ export default function MesReservations({
           );
         })}
       </div>
+      {successMessage && <SuccessToast message={successMessage} />}
     </section>
   );
 }

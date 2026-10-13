@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { updateMatos } from "@/app/actions_serveur/updateMatos";
+import { SuccessToast } from "@/components/ui/success-toast";
 
 type Material = {
   id: number;
@@ -32,7 +33,7 @@ export default function MatosInventory({
   const [values, setValues] = useState<MaterialValues | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedMaterial) return;
@@ -56,7 +57,6 @@ export default function MatosInventory({
       quantity: material.quantity,
     });
     setError("");
-    setSuccess("");
   };
 
   const closeEditor = () => {
@@ -64,7 +64,6 @@ export default function MatosInventory({
     setSelectedMaterial(null);
     setValues(null);
     setError("");
-    setSuccess("");
   };
 
   const setField = <K extends keyof MaterialValues>(
@@ -80,10 +79,10 @@ export default function MatosInventory({
 
     setLoading(true);
     setError("");
-    setSuccess("");
+    setSuccessMessage(null);
     try {
       await updateMatos(selectedMaterial.id, values);
-      setSuccess("Les modifications ont été enregistrées.");
+      setSuccessMessage("Matériel modifié.");
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -256,12 +255,9 @@ export default function MatosInventory({
                 Matériel disponible pour réservation
               </label>
 
-              {(error || success) && (
-                <p
-                  role={error ? "alert" : "status"}
-                  className={`text-sm ${error ? "text-destructive" : "text-green-700 dark:text-green-400"}`}
-                >
-                  {error || success}
+              {error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
                 </p>
               )}
 
@@ -286,6 +282,7 @@ export default function MatosInventory({
           </aside>
         </div>
       )}
+      {successMessage && <SuccessToast message={successMessage} />}
     </div>
   );
 }
