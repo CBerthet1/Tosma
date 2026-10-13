@@ -3,6 +3,9 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   providers: [], // les providers lourds restent dans auth.ts
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
