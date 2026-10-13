@@ -5,7 +5,7 @@ import { getAvailableMatosQuantities } from "@/app/actions_serveur/newResa";
 import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { Button } from "@/components/ui/button";
 import { CalendarClock, CalendarDays, Package, PencilLine, Search, X } from "lucide-react";
-import type { ReservationMaterial } from "@/drizzle/schema";
+import type { ReservationMaterial } from "../../../schema";
 import { SuccessToast } from "@/components/ui/success-toast";
 
 export type ReservationToEdit = {

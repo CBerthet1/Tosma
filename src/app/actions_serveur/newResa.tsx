@@ -1,7 +1,7 @@
 'use server';
 import { auth } from "@/auth";
-import { db } from "../../drizzle/db";
-import { matosTable, resaTable, type ReservationMaterial } from "../../drizzle/schema";
+import { db } from "../../../db";
+import { matosTable, resaTable, type ReservationMaterial } from "../../../schema";
 import { revalidatePath } from "next/cache";
 import { and, asc, gt, inArray, lt, ne } from "drizzle-orm";
 import { parseReservationMaterials } from "@/lib/reservation-materials";

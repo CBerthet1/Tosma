@@ -1,4 +1,4 @@
-import type { ReservationMaterial } from "@/drizzle/schema";
+import type { ReservationMaterial } from "../../schema";
 
 export function parseReservationMaterials(value: unknown): ReservationMaterial[] {
   let parsed = value;

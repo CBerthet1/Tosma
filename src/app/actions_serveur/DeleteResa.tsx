@@ -1,7 +1,7 @@
 'use server';
 import { auth } from "@/auth";
-import { db } from "../../drizzle/db";
-import { resaTable } from "../../drizzle/schema";
+import { db } from "../../../db";
+import { resaTable } from "../../../schema";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 

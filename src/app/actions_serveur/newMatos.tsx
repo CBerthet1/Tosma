@@ -1,7 +1,7 @@
 'use server';
 import { auth } from "@/auth";
-import { db } from "../../drizzle/db";
-import { matosTable } from "../../drizzle/schema";
+import { db } from "../../../db";
+import { matosTable } from "../../../schema";
 import { revalidatePath } from "next/cache";
 import { CATEGORIES } from "@/lib/categories";
 import { hasAdminGroup } from "@/lib/admin";

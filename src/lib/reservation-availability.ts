@@ -1,4 +1,4 @@
-import type { ReservationMaterial } from "@/drizzle/schema";
+import type { ReservationMaterial } from "../../schema";
 
 type ReservationInterval = {
   id?: number;

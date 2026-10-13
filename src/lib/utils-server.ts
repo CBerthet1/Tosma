@@ -1,6 +1,6 @@
 
-import { db } from "../drizzle/db"; // la base de données
-import { resaTable } from "../drizzle/schema"; //la table
+import { db } from "../../db"; // la base de données
+import { resaTable } from "../../schema"; //la table
 import { eq } from "drizzle-orm"; // eq est l'opérateur pour l'égalité
 
 
