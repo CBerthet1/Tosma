@@ -8,6 +8,7 @@ import { parseReservationMaterials } from "@/lib/reservation-materials";
 type MatosOption = {
   id: number;
   name: string | null;
+  quantity: number;
 };
 
 export default async function MesReservations_tab({

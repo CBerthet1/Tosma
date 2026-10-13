@@ -3,10 +3,11 @@
 import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable, resaTable, type ReservationMaterial } from "../../drizzle/schema";
-import { and, eq, gt, inArray, lt, ne } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, lt, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
 import { getDateAfterMonths } from "@/lib/reservation-dates";
+import { getPeakReservedQuantities } from "@/lib/reservation-availability";
 
 export async function updateResa(
   id: number,
@@ -52,7 +53,8 @@ export async function updateResa(
     const [reservation] = await tx
       .select({ id: resaTable.id, userId: resaTable.user })
       .from(resaTable)
-      .where(eq(resaTable.id, id));
+      .where(eq(resaTable.id, id))
+      .for("update");
 
     if (!reservation || reservation.userId !== userId) {
       throw new Error("Vous ne pouvez modifier que les réservations que vous avez créées.");
@@ -66,7 +68,9 @@ export async function updateResa(
           quantity: matosTable.quantity,
         })
         .from(matosTable)
-        .where(inArray(matosTable.id, matos.map((item) => item.matosId)));
+        .where(inArray(matosTable.id, matos.map((item) => item.matosId)))
+        .orderBy(asc(matosTable.id))
+        .for("update");
 
       if (existingMatos.length !== matos.length) {
         throw new Error("Un des matériels sélectionnés n'existe plus.");
@@ -78,6 +82,9 @@ export async function updateResa(
 
       const overlappingReservations = await tx
         .select({
+          id: resaTable.id,
+          start: resaTable.start,
+          end: resaTable.end,
           matos: resaTable.matos,
         })
         .from(resaTable)
@@ -89,17 +96,16 @@ export async function updateResa(
           ),
         );
 
-      const reservedByMatos = new Map<number, number>();
-      for (const reservation of overlappingReservations) {
-        for (const item of parseReservationMaterials(reservation.matos)) {
-          if (matos.some((selected) => selected.matosId === item.matosId)) {
-            reservedByMatos.set(
-              item.matosId,
-              (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
-            );
-          }
-        }
-      }
+      const reservedByMatos = getPeakReservedQuantities(
+        overlappingReservations.map((reservation) => ({
+          start: reservation.start,
+          end: reservation.end,
+          matos: parseReservationMaterials(reservation.matos),
+          id: reservation.id,
+        })),
+        start,
+        end,
+      );
 
       if (
         matos.some((item) => {
@@ -124,7 +130,7 @@ export async function updateResa(
         matos,
       })
       .where(and(eq(resaTable.id, id), eq(resaTable.user, userId)));
-  });
+  }, { isolationLevel: "read committed" });
 
   revalidatePath("/");
 }

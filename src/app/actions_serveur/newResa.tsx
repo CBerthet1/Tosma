@@ -3,9 +3,10 @@ import { auth } from "@/auth";
 import { db } from "../../drizzle/db";
 import { matosTable, resaTable, type ReservationMaterial } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
-import { and, gt, inArray, lt, ne } from "drizzle-orm";
+import { and, asc, gt, inArray, lt, ne } from "drizzle-orm";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
 import { getDateAfterMonths } from "@/lib/reservation-dates";
+import { getPeakReservedQuantities } from "@/lib/reservation-availability";
 
 export async function getAvailableMatosQuantities(
   start: Date,
@@ -34,6 +35,9 @@ export async function getAvailableMatosQuantities(
       .from(matosTable),
     db
       .select({
+        id: resaTable.id,
+        start: resaTable.start,
+        end: resaTable.end,
         matos: resaTable.matos,
       })
       .from(resaTable)
@@ -48,15 +52,17 @@ export async function getAvailableMatosQuantities(
       ),
   ]);
 
-  const reservedByMatos = new Map<number, number>();
-  for (const reservation of reservations) {
-    for (const item of parseReservationMaterials(reservation.matos)) {
-      reservedByMatos.set(
-        item.matosId,
-        (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
-      );
-    }
-  }
+  const reservedByMatos = getPeakReservedQuantities(
+    reservations.map((reservation) => ({
+      id: reservation.id,
+      start: reservation.start,
+      end: reservation.end,
+      matos: parseReservationMaterials(reservation.matos),
+    })),
+    start,
+    end,
+    excludeReservationId,
+  );
 
   return materials.map((material) => ({
     id: material.id,
@@ -102,7 +108,7 @@ export async function newResa(
     throw new Error("Les informations de réservation sont invalides. La fin doit être après le début et la réservation ne peut pas dépasser 11 mois.");
   }
 
-  await db.transaction(async (tx) => { //transaction permet de s'assurer que toutes les opérations sont effectuées correctement, sinon elles sont annulées
+  await db.transaction(async (tx) => {
     if (matos.length > 0) {
       const existingMatos = await tx
         .select({
@@ -111,25 +117,32 @@ export async function newResa(
           quantity: matosTable.quantity,
         })
         .from(matosTable)
-        .where(inArray(matosTable.id, matos.map((item) => item.matosId)));
+        .where(inArray(matosTable.id, matos.map((item) => item.matosId)))
+        .orderBy(asc(matosTable.id))
+        .for("update");
 
       if (existingMatos.length !== matos.length) {
         throw new Error("Un des matériels sélectionnés n'existe plus.");
       }
 
       const overlappingReservations = await tx
-        .select({ matos: resaTable.matos })
+        .select({
+          id: resaTable.id,
+          start: resaTable.start,
+          end: resaTable.end,
+          matos: resaTable.matos,
+        })
         .from(resaTable)
         .where(and(lt(resaTable.start, end), gt(resaTable.end, start)));
-      const reservedByMatos = new Map<number, number>();
-      for (const reservation of overlappingReservations) {
-        for (const item of parseReservationMaterials(reservation.matos)) {
-          reservedByMatos.set(
-            item.matosId,
-            (reservedByMatos.get(item.matosId) ?? 0) + item.quantity,
-          );
-        }
-      }
+      const reservedByMatos = getPeakReservedQuantities(
+        overlappingReservations.map((reservation) => ({
+          start: reservation.start,
+          end: reservation.end,
+          matos: parseReservationMaterials(reservation.matos),
+        })),
+        start,
+        end,
+      );
 
       if (
         matos.some((item) => {
@@ -152,7 +165,7 @@ export async function newResa(
       user: userId,
       matos,
     });
-  });
+  }, { isolationLevel: "read committed" });
 
   revalidatePath("/");
 }

@@ -37,7 +37,8 @@ export default async function Home({ searchParams }: PageProps) {
         id: matosTable.id,
         name: matosTable.name,
         categorie: matosTable.categorie,
-      }).from(matosTable)
+      quantity: matosTable.quantity,
+    }).from(matosTable)
     : [];
 
   return (
