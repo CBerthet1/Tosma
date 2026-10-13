@@ -14,6 +14,7 @@ import { ThemeToggle } from "@/components/ui/switch-theme";
 import { FieldLabel } from "@/components/ui/field";
 import Image from "next/image";
 import { LogOut } from "lucide-react";
+import { hasAdminGroup } from "@/lib/admin";
 
 // On type les searchParams pour l'URL
 type PageProps = {
@@ -27,7 +28,7 @@ export default async function Home({ searchParams }: PageProps) {
     auth(),
   ]);
 
-  const isAdmin = Boolean(session?.user?.groups?.includes("geek"));
+  const isAdmin = hasAdminGroup(session?.user?.groups);
   const showReservations =
     tab === "reservations" ||
     tab === "Nouvelle-Réservation" ||

@@ -4,6 +4,7 @@ import { resaTable } from "../../drizzle/schema";
 import { and, eq, gt } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
+import { hasAdminGroup } from "@/lib/admin";
 
 type MatosOption = {
   id: number;
@@ -23,7 +24,7 @@ export default async function MesReservations_tab({
     return <p className="text-sm text-muted-foreground">Connectez-vous pour voir vos réservations.</p>;
   }
 
-  const isAdmin = Boolean(session.user.groups?.includes("geek"));
+  const isAdmin = hasAdminGroup(session.user.groups);
   const now = new Date();
   const ownRows = await db
     .select({

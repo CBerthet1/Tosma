@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
 import { getDateAfterMonths } from "@/lib/reservation-dates";
 import { getPeakReservedQuantities } from "@/lib/reservation-availability";
+import { hasAdminGroup } from "@/lib/admin";
 
 export async function updateResa(
   id: number,
@@ -18,7 +19,7 @@ export async function updateResa(
 ) {
   const session = await auth();
   const userId = session?.user?.id;
-  const isAdmin = Boolean(session?.user?.groups?.includes("geek"));
+  const isAdmin = hasAdminGroup(session?.user?.groups);
   if (!userId) {
     throw new Error("Vous devez être connecté pour modifier une réservation.");
   }

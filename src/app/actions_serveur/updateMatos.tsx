@@ -6,6 +6,7 @@ import { matosTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { CATEGORIES } from "@/lib/categories";
+import { hasAdminGroup } from "@/lib/admin";
 
 type UpdateMatosInput = {
   name: string;
@@ -18,8 +19,8 @@ type UpdateMatosInput = {
 
 export async function updateMatos(id: number, values: UpdateMatosInput) {
   const session = await auth();
-  if (!session?.user?.groups?.includes("geek")) {
-    throw new Error("Seuls les membres du groupe geek peuvent modifier le matériel.");
+  if (!hasAdminGroup(session?.user?.groups)) {
+    throw new Error("Seuls les membres des groupes geek ou vpmatos peuvent modifier le matériel.");
   }
 
   if (

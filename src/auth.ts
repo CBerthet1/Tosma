@@ -44,7 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return {
             id: credentials.username as string, // Identifiant unique obligatoire pour NextAuth
             name: "arrete_de_lire_les_fichiers",
-            groups: ["geek", "user"] 
+            groups: ["geek", "vpmatos", "user"]
           };
         }
         if (

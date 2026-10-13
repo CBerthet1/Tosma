@@ -4,6 +4,7 @@ import { db } from "../../drizzle/db";
 import { matosTable } from "../../drizzle/schema";
 import { revalidatePath } from "next/cache";
 import { CATEGORIES } from "@/lib/categories";
+import { hasAdminGroup } from "@/lib/admin";
 
 type NewMatosInput = {
   name: string;
@@ -23,8 +24,8 @@ export async function newMatos({
   available,
 }: NewMatosInput) {
   const session = await auth();
-  if (!session?.user?.groups?.includes("geek")) {
-    throw new Error("Seuls les membres du groupe geek peuvent ajouter du matériel.");
+  if (!hasAdminGroup(session?.user?.groups)) {
+    throw new Error("Seuls les membres des groupes geek ou vpmatos peuvent ajouter du matériel.");
   }
 
   if (
