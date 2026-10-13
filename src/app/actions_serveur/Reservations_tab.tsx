@@ -43,6 +43,7 @@ export default async function Reservations_tab({
       start: resaTable.start,
       end: resaTable.end,
       user: resaTable.user,
+      userDisplayName: resaTable.userDisplayName,
       matos: resaTable.matos,
     })
     .from(resaTable);
@@ -70,6 +71,7 @@ export default async function Reservations_tab({
           start: new Date(row.start),
           end: new Date(row.end),
           reservedBy: row.user,
+          reservedByName: row.userDisplayName,
           matos: row.matos.map((item) => ({
             name: materialsById.get(item.matosId)?.name ?? "Matériel sans nom",
             quantity: item.quantity,
