@@ -18,6 +18,7 @@ export async function updateResa(
 ) {
   const session = await auth();
   const userId = session?.user?.id;
+  const isAdmin = Boolean(session?.user?.groups?.includes("geek"));
   if (!userId) {
     throw new Error("Vous devez être connecté pour modifier une réservation.");
   }
@@ -56,8 +57,12 @@ export async function updateResa(
       .where(eq(resaTable.id, id))
       .for("update");
 
-    if (!reservation || reservation.userId !== userId) {
-      throw new Error("Vous ne pouvez modifier que les réservations que vous avez créées.");
+    if (!reservation || (!isAdmin && reservation.userId !== userId)) {
+      throw new Error(
+        isAdmin
+          ? "Cette réservation n'existe pas."
+          : "Vous ne pouvez modifier que les réservations que vous avez créées.",
+      );
     }
 
     if (matos.length > 0) {
@@ -129,7 +134,11 @@ export async function updateResa(
         end,
         matos,
       })
-      .where(and(eq(resaTable.id, id), eq(resaTable.user, userId)));
+      .where(
+        isAdmin
+          ? eq(resaTable.id, id)
+          : and(eq(resaTable.id, id), eq(resaTable.user, userId)),
+      );
   }, { isolationLevel: "read committed" });
 
   revalidatePath("/");

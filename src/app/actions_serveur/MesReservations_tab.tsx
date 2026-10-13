@@ -23,8 +23,9 @@ export default async function MesReservations_tab({
     return <p className="text-sm text-muted-foreground">Connectez-vous pour voir vos réservations.</p>;
   }
 
+  const isAdmin = Boolean(session.user.groups?.includes("geek"));
   const now = new Date();
-  const rows = await db
+  const ownRows = await db
     .select({
       id: resaTable.id,
       name: resaTable.name,
@@ -35,6 +36,26 @@ export default async function MesReservations_tab({
     })
     .from(resaTable)
     .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
+  const selectedRows =
+    isAdmin && reservationToEditId !== null
+      ? await db
+          .select({
+            id: resaTable.id,
+            name: resaTable.name,
+            start: resaTable.start,
+            end: resaTable.end,
+            userId: resaTable.user,
+            matos: resaTable.matos,
+          })
+          .from(resaTable)
+          .where(eq(resaTable.id, reservationToEditId))
+      : [];
+  const rows = [
+    ...ownRows,
+    ...selectedRows.filter(
+      (selected) => !ownRows.some((own) => own.id === selected.id),
+    ),
+  ];
 
   return (
     <MesReservations
@@ -49,6 +70,7 @@ export default async function MesReservations_tab({
       }))}
       matosList={matosList}
       currentUserId={session.user.id}
+      isAdmin={isAdmin}
       reservationToEditId={reservationToEditId}
     />
   );

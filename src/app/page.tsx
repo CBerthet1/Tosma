@@ -114,7 +114,10 @@ export default async function Home({ searchParams }: PageProps) {
           {/* ONGLET 1 : RÉSERVATIONS */}
           {tab === "resas" && (
             <div className="flex w-full min-w-0 flex-col gap-6">
-              <Reservations_tab currentUserId={session?.user?.id ?? null} />
+              <Reservations_tab
+                currentUserId={session?.user?.id ?? null}
+                isAdmin={isAdmin}
+              />
             </div>
           )}
 

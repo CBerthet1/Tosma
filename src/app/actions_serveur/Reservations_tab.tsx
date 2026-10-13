@@ -33,8 +33,10 @@ function getStringColor(str: string | number) {
 // Fonction pour récupérer les réservations
 export default async function Reservations_tab({
   currentUserId,
+  isAdmin,
 }: {
   currentUserId: string | null;
+  isAdmin: boolean;
 }) {
   const rows = await db
     .select({
@@ -64,6 +66,7 @@ export default async function Reservations_tab({
     <div className="w-full h-full flex flex-col">
       <CalendrierResa
         currentUserId={currentUserId}
+        isAdmin={isAdmin}
         reservations={reservations.map((row): Reservation => ({
           id: row.id,
           title: row.title ?? "Réservation sans nom",

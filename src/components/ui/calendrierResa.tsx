@@ -18,6 +18,7 @@ export type Reservation = {
 type WeeklyCalendarProps = {
   reservations: Reservation[];
   currentUserId: string | null;
+  isAdmin: boolean;
 };
 
 // --- PARAMÈTRES D'AFFICHAGE ---
@@ -74,6 +75,7 @@ function calculateLayout(events: Reservation[]) {
 export default function WeeklyCalendar({
   reservations,
   currentUserId,
+  isAdmin,
 }: WeeklyCalendarProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()));
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
@@ -378,13 +380,15 @@ export default function WeeklyCalendar({
             </section>
           </div>
           {currentUserId &&
-            selectedReservation.reservedBy === currentUserId && (
+            (isAdmin || selectedReservation.reservedBy === currentUserId) && (
               <Link
                 href={`/?tab=mes-reservations&edit=${selectedReservation.id}#reservation-${selectedReservation.id}`}
                 className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <PencilLine className="size-4" aria-hidden="true" />
-                Modifier ma réservation
+                {selectedReservation.reservedBy === currentUserId
+                  ? "Modifier ma réservation"
+                  : "Modifier la réservation"}
               </Link>
             )}
         </aside>
