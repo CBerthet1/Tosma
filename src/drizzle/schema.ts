@@ -20,6 +20,7 @@ export const resaTable = mysqlTable('resa', {
   start: datetime('start').notNull().default(sql`CURRENT_TIMESTAMP`),
   end: datetime('end').notNull().default(sql`CURRENT_TIMESTAMP`),
   user: varchar('user', { length: 63 }),
+  userDisplayName: varchar('user_display_name', { length: 255 }),
   matos: json('matos').$type<ReservationMaterial[]>().notNull(),
 });
 
