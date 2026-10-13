@@ -1,7 +1,6 @@
 // db.ts
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
-import * as schema from './schema';
 
 // Connexion à la base de données
 const poolConnection = mysql.createPool({
@@ -9,6 +8,5 @@ const poolConnection = mysql.createPool({
 });
 
 export const db = drizzle(poolConnection);
-
 
 

@@ -26,7 +26,7 @@ export default async function DashboardPage() {
             ))}
           </ul>
         ) : (
-          <p>Vous n'appartenez à aucun groupe.</p>
+          <p>Vous n&apos;appartenez à aucun groupe.</p>
         )}
       </div>
     </div>

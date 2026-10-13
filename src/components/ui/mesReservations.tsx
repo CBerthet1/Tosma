@@ -48,18 +48,36 @@ export default function MesReservations({
   currentUserId,
   reservationToEditId,
 }: MesReservationsProps) {
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const requestedReservation = reservations.find(
+    (item) =>
+      item.id === reservationToEditId && item.userId === currentUserId,
+  );
+  const [editingId, setEditingId] = useState<number | null>(
+    () => requestedReservation?.id ?? null,
+  );
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>({});
+  const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>(
+    () => Object.fromEntries(
+      requestedReservation?.matos.map((item) => [item.matosId, item.quantity]) ?? [],
+    ),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [editRange, setEditRange] = useState({
-    startDate: "",
-    startTime: "",
-    endDate: "",
-    endTime: "",
+  const [editRange, setEditRange] = useState(() => {
+    if (!requestedReservation) {
+      return { startDate: "", startTime: "", endDate: "", endTime: "" };
+    }
+
+    const start = toLocalDateTimeParts(requestedReservation.start);
+    const end = toLocalDateTimeParts(requestedReservation.end);
+    return {
+      startDate: start.date,
+      startTime: start.time,
+      endDate: end.date,
+      endTime: end.time,
+    };
   });
   const [availabilityResult, setAvailabilityResult] = useState<{
     key: string;
@@ -82,28 +100,6 @@ export default function MesReservations({
       !selectedMatosIds.includes(matos.id) &&
       (matos.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false),
   );
-
-  useEffect(() => {
-    const reservation = reservations.find(
-      (item) =>
-        item.id === reservationToEditId && item.userId === currentUserId,
-    );
-    if (!reservation) return;
-
-    const start = toLocalDateTimeParts(reservation.start);
-    const end = toLocalDateTimeParts(reservation.end);
-    setEditingId(reservation.id);
-    setSelectedMatos(Object.fromEntries(
-      reservation.matos.map((item) => [item.matosId, item.quantity]),
-    ));
-    setEditRange({
-      startDate: start.date,
-      startTime: start.time,
-      endDate: end.date,
-      endTime: end.time,
-    });
-    setSearchQuery("");
-  }, [reservationToEditId, reservations, currentUserId]);
 
   useEffect(() => {
     if (editingId === null) return;

@@ -38,6 +38,7 @@ export default async function MesReservations_tab({
 
   return (
     <MesReservations
+      key={reservationToEditId ?? "no-edit"}
       reservations={rows.map((row): ReservationToEdit => ({
         id: row.id,
         name: row.name ?? "",

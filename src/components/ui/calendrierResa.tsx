@@ -43,7 +43,7 @@ function calculateLayout(events: Reservation[]) {
 
   sorted.forEach((event) => {
     let placed = false;
-    for (let col of columns) {
+    for (const col of columns) {
       const lastEvent = col[col.length - 1];
       if (new Date(lastEvent.end) <= new Date(event.start)) {
         col.push(event);
@@ -156,7 +156,7 @@ export default function WeeklyCalendar({
             onClick={handleToday}
             className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-extrabold text-primary transition-colors hover:bg-primary/20"
           >
-            Aujourd'hui
+            Aujourd&apos;hui
           </button>
           <button
             onClick={handleNextWeek}

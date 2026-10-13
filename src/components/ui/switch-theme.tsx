@@ -24,7 +24,10 @@ export function ThemeToggle({
         className
       )}
       checked={theme === 'dark'}
-      onClick={toggleTheme}
+      onClick={(event) => {
+        onClick?.(event);
+        toggleTheme();
+      }}
       {...props}
       
     >
@@ -35,5 +38,4 @@ export function ThemeToggle({
     </SwitchPrimitive.Root>
   )
 }
-
 
