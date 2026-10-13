@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { auth } from "@/auth";
-import { db } from "../drizzle/db";
+import { db } from "../../db";
 import Reservations_tab from "@/app/actions_serveur/Reservations_tab";
 import MesReservations_tab from "@/app/actions_serveur/MesReservations_tab";
 import Matos_tab from "./actions_serveur/matos_tab"; 
 import { logout } from "@/app/actions_serveur/logout";
-import { matosTable } from "../drizzle/schema";
+import { matosTable } from "../../schema";
 import { CATEGORIES } from "@/lib/categories";
 import { BoutonAddResa } from "@/components/ui/addResa_button";
 import { BoutonAddMatos } from "@/components/ui/addMatos_button";

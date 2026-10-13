@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1782069568867,
-      "tag": "0000_hard_enchantress",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1782072003212,
-      "tag": "0001_amazing_blacklash",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1782940146924,
-      "tag": "0002_rich_synch",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1789477923959,
-      "tag": "0003_wide_mad_thinker",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1789982421197,
-      "tag": "0004_heavy_daredevil",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1790770344920,
-      "tag": "0005_perpetual_stryfe",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1791902940000,
-      "tag": "0006_add_resa_user_display_name",
+      "when": 1791907536815,
+      "tag": "0000_rare_spacker_dave",
       "breakpoints": true
     }
   ]

@@ -1,7 +1,7 @@
 'use server'; // Ce composant est côté serveur
 
-import { db } from "../../drizzle/db";
-import { matosTable, resaTable } from "../../drizzle/schema";
+import { db } from "../../../db";
+import { matosTable, resaTable } from "../../../schema";
 import CalendrierResa, { Reservation } from "@/components/ui/calendrierResa";
 import { inArray } from "drizzle-orm";
 import { parseReservationMaterials } from "@/lib/reservation-materials";

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { db } from "../../drizzle/db";
-import { resaTable } from "../../drizzle/schema";
+import { db } from "../../../db";
+import { resaTable } from "../../../schema";
 import { and, eq, gt } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
