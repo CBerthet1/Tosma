@@ -11,7 +11,6 @@ export type Reservation = {
   start: Date;
   end: Date;
   reservedBy: string | null;
-  reservedByName: string | null;
   matos: { name: string; quantity: number }[];
   color?: string;
 };
@@ -321,9 +320,7 @@ export default function WeeklyCalendar({
                 Réservé par
               </h3>
               <p className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 text-sm">
-                {selectedReservation.reservedByName ||
-                  selectedReservation.reservedBy ||
-                  "Utilisateur inconnu"}
+                {selectedReservation.reservedBy || "Utilisateur inconnu"}
               </p>
             </section>
 

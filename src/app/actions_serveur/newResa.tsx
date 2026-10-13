@@ -78,8 +78,7 @@ export async function newResa(
   name: string, 
   matos: ReservationMaterial[]
 ) {
-  const sessionUser = (await auth())?.user;
-  const userId = sessionUser?.id;
+  const userId = (await auth())?.user?.id;
   if (!userId) {
     throw new Error("Votre session ne permet pas d'identifier le créateur de la réservation.");
   }
@@ -164,7 +163,6 @@ export async function newResa(
       start: start,
       end: end,
       user: userId,
-      userDisplayName: sessionUser.name?.trim() || null,
       matos,
     });
   }, { isolationLevel: "read committed" });
