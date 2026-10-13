@@ -5,6 +5,7 @@ import { matosTable, resaTable, type ReservationMaterial } from "../../drizzle/s
 import { revalidatePath } from "next/cache";
 import { and, gt, inArray, lt, ne } from "drizzle-orm";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
+import { getDateAfterMonths } from "@/lib/reservation-dates";
 
 export async function getAvailableMatosQuantities(
   start: Date,
@@ -85,6 +86,7 @@ export async function newResa(
     Number.isNaN(start.getTime()) ||
     Number.isNaN(end.getTime()) ||
     start >= end ||
+    end > getDateAfterMonths(start, 11) ||
     !Array.isArray(matos) ||
     !matos.every(
       (item) =>
@@ -97,7 +99,7 @@ export async function newResa(
     ) ||
     new Set(matos.map((item) => item.matosId)).size !== matos.length
   ) {
-    throw new Error("Les informations de réservation sont invalides.");
+    throw new Error("Les informations de réservation sont invalides. La fin doit être après le début et la réservation ne peut pas dépasser 11 mois.");
   }
 
   await db.transaction(async (tx) => { //transaction permet de s'assurer que toutes les opérations sont effectuées correctement, sinon elles sont annulées

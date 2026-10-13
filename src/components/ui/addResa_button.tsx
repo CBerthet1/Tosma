@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAvailableMatosQuantities, newResa } from "../../app/actions_serveur/newResa";
-import { CalendarPlus2, Package, Search, X } from "lucide-react";
+import { CalendarDays, CalendarPlus2, Package, Search, X } from "lucide-react";
 import type { Category } from "@/lib/categories";
+import { getDateAfterMonths } from "@/lib/reservation-dates";
 
 // Génère les créneaux horaires
 const generateTimeSlots = () => {
@@ -20,6 +21,118 @@ const generateTimeSlots = () => {
 
 const TIME_SLOTS = generateTimeSlots();
 
+const MONTHS = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
+
+function getDaysInMonth(month: number, year?: number) {
+  return new Date(year ?? 2000, month, 0).getDate();
+}
+
+function nextMonth(month: number) {
+  return (month % 12) + 1;
+}
+
+function adjustStartMonth(day: number, month: number, year: number, now: Date) {
+  const candidate = new Date(year, month - 1, day);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return year === now.getFullYear() &&
+    month === now.getMonth() + 1 &&
+    candidate < today
+    ? nextMonth(month)
+    : month;
+}
+
+function adjustEndMonth(
+  day: number,
+  month: number,
+  startDate: string,
+  startTime: string,
+  endTime: string,
+  endYear: number,
+) {
+  if (!startDate) return month;
+  const start = new Date(`${startDate}T${startTime}`);
+  const candidateAtEndTime = new Date(`${toDateValue(endYear, month, day)}T${endTime}`);
+  return endYear === start.getFullYear() && candidateAtEndTime <= start
+    ? nextMonth(month)
+    : month;
+}
+
+function toDateValue(year: number, month: number, day: number) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getDateValue(day: number, month: number, year: number) {
+  const candidate = new Date(year, month - 1, day);
+  return candidate.getMonth() === month - 1 && candidate.getDate() === day
+    ? toDateValue(year, month, day)
+    : "";
+}
+
+function getNextStartYear(day: number, month: number, year: number, now: Date) {
+  let candidateYear = year;
+  let candidate = new Date(candidateYear, month - 1, day);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  while (
+    (candidate.getMonth() !== month - 1 ||
+      candidate.getDate() !== day ||
+      candidate < today) &&
+    candidateYear < now.getFullYear() + 9
+  ) {
+    candidateYear += 1;
+    candidate = new Date(candidateYear, month - 1, day);
+  }
+
+  return candidate.getMonth() === month - 1 &&
+    candidate.getDate() === day &&
+    candidate >= today
+    ? candidateYear
+    : null;
+}
+
+function getNextEndYear(
+  day: number,
+  month: number,
+  year: number,
+  startDate: string,
+  startTime: string,
+  endTime: string,
+) {
+  if (!startDate) return null;
+  const start = new Date(`${startDate}T${startTime}`);
+  let candidateYear = year;
+  let candidate = new Date(candidateYear, month - 1, day);
+  if (
+    candidate.getMonth() !== month - 1 ||
+    candidate.getDate() !== day ||
+    new Date(`${toDateValue(candidateYear, month, day)}T${endTime}`) <= start
+  ) {
+    candidateYear += 1;
+    candidate = new Date(candidateYear, month - 1, day);
+  }
+
+  const latestEnd = getDateAfterMonths(start, 11);
+
+  return candidate.getMonth() === month - 1 &&
+    candidate.getDate() === day &&
+    new Date(`${toDateValue(candidateYear, month, day)}T${endTime}`) > start &&
+    candidate <= latestEnd
+    ? candidateYear
+    : null;
+}
+
 // Type pour le matériel reçu en props
 type Matos = {
   id: number;
@@ -33,11 +146,18 @@ interface BoutonAddResaProps {
 }
 
 export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps) {
-  const [startDate, setStartDate] = useState("");
+  const [initialDate] = useState(() => new Date());
+  const [startDay, setStartDay] = useState(initialDate.getDate());
+  const [startMonth, setStartMonth] = useState(initialDate.getMonth() + 1);
+  const [startYear, setStartYear] = useState(initialDate.getFullYear());
   const [startTime, setStartTime] = useState("09:00");
 
-  const [endDate, setEndDate] = useState("");
+  const [endDay, setEndDay] = useState(initialDate.getDate());
+  const [endMonth, setEndMonth] = useState(initialDate.getMonth() + 1);
+  const [endYear, setEndYear] = useState(initialDate.getFullYear());
   const [endTime, setEndTime] = useState("09:15");
+  const startDatePickerRef = useRef<HTMLInputElement>(null);
+  const endDatePickerRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
   
@@ -55,15 +175,31 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
   const [categorie, setCategorie] = useState("");
+  const years = Array.from(
+    { length: 10 },
+    (_, index) => initialDate.getFullYear() + index,
+  );
 
+  const startDate = getDateValue(startDay, startMonth, startYear);
+  const endDate = getDateValue(endDay, endMonth, endYear);
   const start = startDate ? new Date(`${startDate}T${startTime}`) : null;
   const end = endDate ? new Date(`${endDate}T${endTime}`) : null;
+  const latestEnd = start ? getDateAfterMonths(start, 11) : null;
+  const isWithinElevenMonths = Boolean(
+    start &&
+      end &&
+      latestEnd &&
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      end <= latestEnd,
+  );
   const hasValidDateRange = Boolean(
     start &&
       end &&
       !Number.isNaN(start.getTime()) &&
       !Number.isNaN(end.getTime()) &&
-      start < end,
+      start < end &&
+      isWithinElevenMonths,
   );
   const availabilityKey = `${startDate}T${startTime}/${endDate}T${endTime}`;
   const hasCurrentAvailability = availabilityResult?.key === availabilityKey;
@@ -144,6 +280,16 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
     });
   };
 
+  const openDatePicker = (input: HTMLInputElement | null) => {
+    if (!input) return;
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+    } else {
+      input.focus();
+      input.click();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -153,6 +299,15 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
       // 2. Fusion exacte de la date et de l'heure
       const start = new Date(`${startDate}T${startTime}`);
       const end = new Date(`${endDate}T${endTime}`);
+      const latestEnd = getDateAfterMonths(start, 11);
+      if (
+        Number.isNaN(start.getTime()) ||
+        Number.isNaN(end.getTime()) ||
+        start >= end ||
+        end > latestEnd
+      ) {
+        throw new Error("La réservation doit se terminer après son début et ne peut pas dépasser 11 mois.");
+      }
 
       // 3. Appel de newResa avec la liste des matériels
       await newResa(
@@ -164,8 +319,13 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
 
       // Remise à zéro des champs
       setName("");
-      setStartDate("");
-      setEndDate("");
+      const today = new Date();
+      setStartDay(today.getDate());
+      setStartMonth(today.getMonth() + 1);
+      setStartYear(today.getFullYear());
+      setEndDay(today.getDate());
+      setEndMonth(today.getMonth() + 1);
+      setEndYear(today.getFullYear());
       setSelectedMatos({});
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "La réservation n'a pas pu être créée.");
@@ -213,19 +373,105 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label 
-                htmlFor="res-start-date" 
+                htmlFor="res-start-day-select"
                 className="text-sm font-semibold"
               >
                 Début
               </label>
-              <input
-                id="res-start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                required
-                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Ouvrir le calendrier pour la date de début"
+                  onClick={() => openDatePicker(startDatePickerRef.current)}
+                  className="inline-flex size-8 items-center justify-center rounded-lg border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                >
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                </button>
+                <label className="sr-only" htmlFor="res-start-day-select">Jour de début</label>
+                <select
+                  id="res-start-day-select"
+                  aria-label="Jour de début"
+                  value={startDay}
+                  onChange={(event) => {
+                    const day = Number(event.target.value);
+                    const month = adjustStartMonth(
+                      day,
+                      startMonth,
+                      startYear,
+                      new Date(),
+                    );
+                    const year =
+                      getNextStartYear(day, month, startYear, new Date()) ?? startYear;
+                    setStartMonth(month);
+                    setStartDay(Math.min(day, getDaysInMonth(month)));
+                    setStartYear(year);
+                    setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
+                  }}
+                  className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                >
+                  {Array.from({ length: getDaysInMonth(startMonth) }, (_, index) => index + 1).map((day) => (
+                    <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
+                  ))}
+                </select>
+                <div className="col-start-2 flex min-w-0 items-center gap-1.5">
+                  <label className="sr-only" htmlFor="res-start-month">Mois de début</label>
+                  <select
+                    id="res-start-month"
+                    aria-label="Mois de début"
+                    value={startMonth}
+                    onChange={(event) => {
+                      const selectedMonth = Number(event.target.value);
+                      const month = adjustStartMonth(
+                        startDay,
+                        selectedMonth,
+                        startYear,
+                        new Date(),
+                      );
+                      const year =
+                        getNextStartYear(startDay, month, startYear, new Date()) ?? startYear;
+                      setStartMonth(month);
+                      setStartDay((day) => Math.min(day, getDaysInMonth(month)));
+                      setStartYear(year);
+                      setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
+                    }}
+                    className="min-w-0 flex-1 rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {MONTHS.map((month, index) => (
+                      <option key={month} value={index + 1}>{month}</option>
+                    ))}
+                  </select>
+                  <label className="sr-only" htmlFor="res-start-year">Année de début</label>
+                  <select
+                    id="res-start-year"
+                    aria-label="Année de début"
+                    value={startYear}
+                    onChange={(event) => {
+                      const year = Number(event.target.value);
+                      setStartYear(year);
+                      setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
+                    }}
+                    className="w-[4.5rem] shrink-0 rounded-lg border border-input bg-background px-1.5 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {years.map((year) => <option key={year} value={year}>{year}</option>)}
+                  </select>
+                </div>
+                <input
+                  ref={startDatePickerRef}
+                  type="date"
+                  aria-label="Date de début dans le calendrier"
+                  value={startDate}
+                  onChange={(event) => {
+                    const [year, month, day] = event.target.value.split("-").map(Number);
+                    if (year && month && day) {
+                      setStartDay(day);
+                      setStartMonth(month);
+                      setStartYear(year);
+                      setEndYear((previous) => Math.max(year, Math.min(previous, year + 1)));
+                    }
+                  }}
+                  className="sr-only"
+                />
+              </div>
               <select
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -239,20 +485,119 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
 
             <div className="space-y-1.5">
               <label 
-                htmlFor="res-end-date" 
+                htmlFor="res-end-day-select"
                 className="text-sm font-semibold"
               >
                 Fin
               </label>
-              <input
-                id="res-end-date"
-                type="date"
-                min={startDate}
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                required
-                className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-1.5">
+                <button
+                  type="button"
+                  aria-label="Ouvrir le calendrier pour la date de fin"
+                  onClick={() => openDatePicker(endDatePickerRef.current)}
+                  className="inline-flex size-8 items-center justify-center rounded-lg border border-input text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                >
+                  <CalendarDays className="size-4" aria-hidden="true" />
+                </button>
+                <label className="sr-only" htmlFor="res-end-day-select">Jour de fin</label>
+                <select
+                  id="res-end-day-select"
+                  aria-label="Jour de fin"
+                  value={endDay}
+                  onChange={(event) => {
+                    const day = Number(event.target.value);
+                    const month = adjustEndMonth(day, endMonth, startDate, startTime, endTime, endYear);
+                    const year = getNextEndYear(
+                      day,
+                      month,
+                      endYear,
+                      startDate,
+                      startTime,
+                      endTime,
+                    );
+                    setEndMonth(month);
+                    setEndDay(Math.min(day, getDaysInMonth(month)));
+                    if (year !== null) setEndYear(year);
+                  }}
+                  className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                >
+                  {Array.from({ length: getDaysInMonth(endMonth) }, (_, index) => index + 1).map((day) => (
+                    <option key={day} value={day}>{String(day).padStart(2, "0")}</option>
+                  ))}
+                </select>
+                <div className="col-start-2 flex min-w-0 items-center gap-1.5">
+                  <label className="sr-only" htmlFor="res-end-month">Mois de fin</label>
+                  <select
+                    id="res-end-month"
+                    aria-label="Mois de fin"
+                    value={endMonth}
+                    onChange={(event) => {
+                      const selectedMonth = Number(event.target.value);
+                      const month = adjustEndMonth(
+                        endDay,
+                        selectedMonth,
+                        startDate,
+                        startTime,
+                        endTime,
+                        endYear,
+                      );
+                      const year = getNextEndYear(
+                        endDay,
+                        month,
+                        endYear,
+                        startDate,
+                        startTime,
+                        endTime,
+                      );
+                      setEndMonth(month);
+                      setEndDay((day) => Math.min(day, getDaysInMonth(month)));
+                      if (year !== null) setEndYear(year);
+                    }}
+                    className="min-w-0 flex-1 rounded-lg border border-input bg-background px-2 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {MONTHS.map((month, index) => (
+                      <option key={month} value={index + 1}>{month}</option>
+                    ))}
+                  </select>
+                  <label className="sr-only" htmlFor="res-end-year">Année de fin</label>
+                  <select
+                    id="res-end-year"
+                    aria-label="Année de fin"
+                    value={endYear}
+                    onChange={(event) => setEndYear(Number(event.target.value))}
+                    className="w-[4.5rem] shrink-0 rounded-lg border border-input bg-background px-1.5 py-1.5 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  >
+                    {[startYear, startYear + 1].map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  ref={endDatePickerRef}
+                  type="date"
+                  aria-label="Date de fin dans le calendrier"
+                  value={endDate}
+                  min={startDate}
+                  max={
+                    latestEnd
+                      ? toDateValue(
+                          latestEnd.getFullYear(),
+                          latestEnd.getMonth() + 1,
+                          latestEnd.getDate(),
+                        )
+                      : undefined
+                  }
+                  onChange={(event) => {
+                    const [year, month, day] = event.target.value.split("-").map(Number);
+                    if (year && month && day) {
+                      setEndDay(day);
+                      setEndMonth(month);
+                      setEndYear(year);
+                    }
+                  }}
+                  className="sr-only"
+                />
+              </div>
               <select
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
@@ -264,6 +609,11 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
               </select>
             </div>
           </div>
+          {startDate && (!endDate || !isWithinElevenMonths) && (
+            <p role="alert" className="text-xs text-destructive">
+              La réservation ne peut pas dépasser 11 mois. Vérifiez les dates.
+            </p>
+          )}
 
           {/* 4. Sélection du matériel avec champ de recherche */}
           <div
@@ -430,6 +780,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
             type="submit"
             disabled={
               loading ||
+              !hasValidDateRange ||
               (selectedMatosIds.length > 0 &&
                 (checkingAvailability || Boolean(availabilityError) || hasInsufficientAvailability))
             }
