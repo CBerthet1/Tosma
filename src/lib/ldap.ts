@@ -67,7 +67,7 @@ export async function authenticateWithLDAP(username: string, password: string) {
 
   } catch {
     console.error('Échec de l’authentification LDAP.');
-    // TRÈS IMPORTANT : On coupe la connexion au LDAP
+  } finally {
     if (client) {
       try {
         await client.unbind();
