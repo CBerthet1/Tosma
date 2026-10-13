@@ -260,10 +260,82 @@
 
 .login-content {
   display: flex;
-  width: min(100%, 23rem);
+  width: min(100%, 28rem);
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.login-decoration {
+  position: absolute;
+  width: clamp(2.25rem, 6vw, 4rem);
+  height: clamp(3.5rem, 10vw, 6rem);
+  opacity: 0.24;
+}
+
+.login-logo-decoration {
+  width: 100%;
+  height: 100%;
+  animation: hyris-spin 42s linear infinite;
+}
+
+.login-decoration-top-left {
+  top: 7%;
+  left: 14%;
+}
+
+.login-decoration-top-right {
+  top: 12%;
+  right: 14%;
+}
+
+.login-decoration-upper-left {
+  top: 32%;
+  left: 7%;
+}
+
+.login-decoration-upper-right {
+  top: 39%;
+  right: 8%;
+}
+
+.login-decoration-lower-left {
+  bottom: 29%;
+  left: 12%;
+}
+
+.login-decoration-lower-right {
+  right: 13%;
+  bottom: 25%;
+}
+
+.login-decoration-bottom-left {
+  bottom: 2%;
+  left: 12%;
+}
+
+.login-decoration-bottom-right {
+  right: 12%;
+  bottom: 2%;
+}
+
+.login-decoration-bottom-near-left {
+  bottom: 3%;
+  left: 25%;
+}
+
+.login-decoration-bottom-near-right {
+  right: 25%;
+  bottom: 3%;
+}
+
+.login-brand {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 15rem;
+  place-items: center;
+  margin-bottom: 1.1rem;
 }
 
 .login-mark {
@@ -271,14 +343,15 @@
   width: 12rem;
   height: 13rem;
   place-items: center;
-  margin-bottom: 1.1rem;
+  z-index: 1;
+  transform: translateY(-5.5rem);
 }
 
 .login-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  animation: hyris-spin 28s linear infinite;
+  animation: hyris-spin 36s linear infinite;
   filter: drop-shadow(0 0 1.4rem rgb(255 255 255 / 12%));
 }
 
@@ -306,7 +379,7 @@
 
 .login-form {
   display: flex;
-  width: 100%;
+  width: min(100%, 23rem);
   flex-direction: column;
   align-items: center;
   gap: 1.1rem;
@@ -396,12 +469,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-logo {
+  .login-logo,
+  .login-logo-decoration {
     animation: none;
   }
 
   .login-input,
   .login-submit {
     transition: none;
+  }
+}
+
+@media (max-width: 36rem) {
+  .login-decoration {
+    display: none;
   }
 }

@@ -3,6 +3,19 @@ import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
 
+const decorativeLogos = [
+  "top-left",
+  "top-right",
+  "upper-left",
+  "upper-right",
+  "lower-left",
+  "lower-right",
+  "bottom-left",
+  "bottom-right",
+  "bottom-near-left",
+  "bottom-near-right",
+] as const;
+
 type LoginPageProps = {
   searchParams: Promise<{ error?: string }>;
 };
@@ -40,17 +53,35 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="login-screen">
       <div className="login-glow login-glow-top" aria-hidden="true" />
       <div className="login-glow login-glow-bottom" aria-hidden="true" />
-
-      <section className="login-content" aria-labelledby="login-title">
-        <div className="login-mark">
+      {decorativeLogos.map((position) => (
+        <div
+          key={position}
+          className={`login-decoration login-decoration-${position}`}
+          aria-hidden="true"
+        >
           <Image
             src="/H_Hyris.png"
-            alt="Logo Hyris"
-            width={220}
-            height={260}
-            priority
-            className="login-logo"
+            alt=""
+            width={100}
+            height={150}
+            unoptimized
+            className="login-logo login-logo-decoration"
           />
+        </div>
+      ))}
+      <section className="login-content" aria-labelledby="login-title">
+        <div className="login-brand">
+          <div className="login-mark">
+            <Image
+              src="/H_Hyris.png"
+              alt="Logo Hyris"
+              width={220}
+              height={260}
+              priority
+              unoptimized
+              className="login-logo"
+            />
+          </div>
         </div>
 
         <h1 id="login-title" className="login-title">
