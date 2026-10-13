@@ -18,7 +18,7 @@ type Material = {
 type MaterialValues = Omit<Material, "id" | "displayCategory">;
 
 const inputClassName =
-  "w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300";
+  "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
 
 export default function MatosInventory({
   categories,
@@ -250,7 +250,7 @@ export default function MatosInventory({
                   type="checkbox"
                   checked={values.available}
                   onChange={(event) => setField("available", event.target.checked)}
-                  className="size-4 accent-slate-900"
+                  className="size-4 accent-primary"
                 />
                 Matériel disponible pour réservation
               </label>
@@ -273,7 +273,7 @@ export default function MatosInventory({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-md bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+                  className="rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loading ? "Enregistrement..." : "Enregistrer"}
                 </button>

@@ -74,7 +74,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               maxLength={255}
               onChange={(event) => updateValue("name", event.target.value)}
               required
-              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -87,7 +87,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               value={values.categorie}
               onChange={(event) => updateValue("categorie", event.target.value)}
               required
-              className="w-full appearance-none rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full appearance-none rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="" disabled>Sélectionnez une catégorie</option>
               {categories.map((category) => (
@@ -106,7 +106,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               onChange={(event) => updateValue("description", event.target.value)}
               rows={4}
               placeholder="Décrivez le matériel, son état ou toute information utile."
-              className="w-full resize-y rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -121,7 +121,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               maxLength={255}
               onChange={(event) => updateValue("image", event.target.value)}
               placeholder="https://…"
-              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -137,7 +137,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               value={values.quantity}
               onChange={(event) => updateValue("quantity", event.target.value)}
               required
-              className="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 dark:border-slate-800 dark:focus:ring-slate-300"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -146,7 +146,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
               type="checkbox"
               checked={values.available}
               onChange={(event) => updateValue("available", event.target.checked)}
-              className="size-4 accent-slate-900"
+              className="size-4 accent-primary"
             />
             Matériel disponible pour réservation
           </label>
@@ -162,7 +162,7 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
           <button
             type="submit"
             disabled={loading}
-            className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-200"
+            className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Ajout en cours..." : "Ajouter le matériel"}
           </button>
