@@ -22,9 +22,9 @@ type WeeklyCalendarProps = {
 };
 
 // --- PARAMÈTRES D'AFFICHAGE ---
-const START_HOUR = 0; // 00h00
-const END_HOUR = 24; // 24h00
-const TOTAL_GRID_MINUTES = (END_HOUR - START_HOUR) * 60; // 1440 minutes
+const GRID_START_HOUR = 0;
+const GRID_END_HOUR = 24; // 24h00
+const AFTERNOON_START_HOUR = 13;
 
 // --- FONCTION POUR OBTENIR LE LUNDI DE LA SEMAINE ---
 function getMonday(date: Date) {
@@ -120,8 +120,26 @@ export default function WeeklyCalendar({
     });
   }, [currentWeekStart]);
 
-  // Générer les heures de 0 à 23
-  const hours = Array.from({ length: END_HOUR - START_HOUR }).map((_, i) => START_HOUR + i);
+  const hasMorningReservationInWeek = useMemo(
+    () =>
+      days.some((day) => {
+        const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0);
+        const cutoff = new Date(day.getFullYear(), day.getMonth(), day.getDate(), AFTERNOON_START_HOUR, 0, 0);
+
+        return reservations.some((reservation) => {
+          const start = new Date(reservation.start);
+          const end = new Date(reservation.end);
+          return start < cutoff && end > dayStart;
+        });
+      }),
+    [days, reservations],
+  );
+
+  const visibleStartHour = hasMorningReservationInWeek ? GRID_START_HOUR : AFTERNOON_START_HOUR;
+  const totalGridMinutes = (GRID_END_HOUR - visibleStartHour) * 60;
+  const hours = Array.from({ length: GRID_END_HOUR - visibleStartHour }).map(
+    (_, i) => visibleStartHour + i,
+  );
 
   // Filtrer les événements pour un jour donné
   const getEventsForDay = (dayDate: Date) => {
@@ -194,7 +212,7 @@ export default function WeeklyCalendar({
           {/* Colonne des heures */}
           <div className="relative z-10 w-16 flex-shrink-0 border-r border-border bg-card">
             {hours.map((hour, i) => {
-              const hourTopPercent = (i * 60 / TOTAL_GRID_MINUTES) * 100;
+              const hourTopPercent = (i * 60 / totalGridMinutes) * 100;
               return (
                 <div
                   key={i}
@@ -213,7 +231,7 @@ export default function WeeklyCalendar({
             {/* Lignes horizontales de fond */}
             <div className="absolute inset-0 pointer-events-none">
               {hours.map((_, i) => {
-                const lineTopPercent = (i * 60 / TOTAL_GRID_MINUTES) * 100;
+                const lineTopPercent = (i * 60 / totalGridMinutes) * 100;
                 return (
                   <div
                     key={i}
@@ -244,13 +262,13 @@ export default function WeeklyCalendar({
                     const visualEnd = endDate > dayEnd ? dayEnd : endDate;
 
                     const startMins = visualStart.getHours() * 60 + visualStart.getMinutes();
-                    let offsetMins = startMins - (START_HOUR * 60); 
-                    if (offsetMins < 0) offsetMins = 0; 
+                    let offsetMins = startMins - (visibleStartHour * 60);
+                    if (offsetMins < 0) offsetMins = 0;
 
                     const durationMins = (visualEnd.getTime() - visualStart.getTime()) / 60000;
-                    
-                    const topPercent = (offsetMins / TOTAL_GRID_MINUTES) * 100;
-                    const heightPercent = (durationMins / TOTAL_GRID_MINUTES) * 100;
+
+                    const topPercent = (offsetMins / totalGridMinutes) * 100;
+                    const heightPercent = (durationMins / totalGridMinutes) * 100;
                     const finalHeight = Math.max(heightPercent, 1.5); 
 
                     return (
