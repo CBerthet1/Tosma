@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8084:3000" 
+    environment:
+      - DB_HOST= tosma-mysql-1
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=matos
+    networks:
+      - reseau_v1
+
+networks:
+  reseau_v1:
+    external: true
+    name: tosma_default 
