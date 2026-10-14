@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "../../../db";
 import { resaTable } from "../../../schema";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, lte } from "drizzle-orm";
 import MesReservations, { type ReservationToEdit } from "@/components/ui/mesReservations";
 import { parseReservationMaterials } from "@/lib/reservation-materials";
 import { hasAdminGroup } from "@/lib/admin";
@@ -26,37 +26,32 @@ export default async function MesReservations_tab({
 
   const isAdmin = hasAdminGroup(session.user.groups);
   const now = new Date();
-  const ownRows = await db
-    .select({
-      id: resaTable.id,
-      name: resaTable.name,
-      start: resaTable.start,
-      end: resaTable.end,
-      userId: resaTable.user,
-      matos: resaTable.matos,
-    })
-    .from(resaTable)
-    .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id)));
-  const selectedRows =
-    isAdmin && reservationToEditId !== null
-      ? await db
-          .select({
-            id: resaTable.id,
-            name: resaTable.name,
-            start: resaTable.start,
-            end: resaTable.end,
-            userId: resaTable.user,
-            matos: resaTable.matos,
-          })
+  const [rows, finishedReservation] = await Promise.all([
+    db
+      .select({
+        id: resaTable.id,
+        name: resaTable.name,
+        start: resaTable.start,
+        end: resaTable.end,
+        userId: resaTable.user,
+        matos: resaTable.matos,
+      })
+      .from(resaTable)
+      .where(and(gt(resaTable.end, now), eq(resaTable.user, session.user.id))),
+    reservationToEditId === null
+      ? Promise.resolve([])
+      : db
+          .select({ id: resaTable.id })
           .from(resaTable)
-          .where(eq(resaTable.id, reservationToEditId))
-      : [];
-  const rows = [
-    ...ownRows,
-    ...selectedRows.filter(
-      (selected) => !ownRows.some((own) => own.id === selected.id),
-    ),
-  ];
+          .where(
+            and(
+              eq(resaTable.id, reservationToEditId),
+              eq(resaTable.user, session.user.id),
+              lte(resaTable.end, now),
+            ),
+          )
+          .limit(1),
+  ]);
 
   return (
     <MesReservations
@@ -73,6 +68,7 @@ export default async function MesReservations_tab({
       currentUserId={session.user.id}
       isAdmin={isAdmin}
       reservationToEditId={reservationToEditId}
+      requestedReservationIsFinished={finishedReservation.length > 0}
     />
   );
 }
