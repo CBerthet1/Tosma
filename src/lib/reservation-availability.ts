@@ -1,4 +1,4 @@
-import type { ReservationMaterial } from "../../schema";
+import type { ReservationMaterial } from "@/db/schema";
 
 type ReservationInterval = {
   id?: number;

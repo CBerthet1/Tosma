@@ -6,7 +6,7 @@ import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { DeleteResa } from "@/app/actions_serveur/DeleteResa";
 import { Button } from "@/components/ui/button";
 import { CalendarClock, CalendarDays, CircleAlert, Package, PencilLine, Search, Trash2, X } from "lucide-react";
-import type { ReservationMaterial } from "../../../schema";
+import type { ReservationMaterial } from "@/db/schema";
 import { SuccessToast } from "@/components/ui/success-toast";
 
 export type ReservationToEdit = {

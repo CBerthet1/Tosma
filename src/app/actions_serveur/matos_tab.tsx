@@ -1,7 +1,7 @@
 'use server'; // Ce composant est côté serveur
 
-import { db } from "../../../db";
-import { matosTable } from "../../../schema";
+import { db } from "@/db";
+import { matosTable } from "@/db/schema";
 import { asc } from 'drizzle-orm';
 import { CATEGORIES } from "@/lib/categories";
 import MatosInventory from "@/components/ui/matos_inventory";

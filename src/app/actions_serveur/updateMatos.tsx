@@ -1,8 +1,8 @@
 'use server';
 
 import { auth } from "@/auth";
-import { db } from "../../../db";
-import { matosTable } from "../../../schema";
+import { db } from "@/db";
+import { matosTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { CATEGORIES } from "@/lib/categories";
