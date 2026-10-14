@@ -1,7 +1,7 @@
 FROM node:18-alpine
 
 # 1. Activation de Corepack pour gérer pnpm
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # 2. Définition du répertoire de travail dans le conteneur
 WORKDIR /app
