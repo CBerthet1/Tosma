@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint",
+    "test": "tsx --test src/lib/admin.test.ts src/lib/reservation-availability.test.ts src/lib/reservation-dates.test.ts src/lib/reservation-materials.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
