@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getAvailableMatosQuantities } from "@/app/actions_serveur/newResa";
 import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, CalendarDays, Package, PencilLine, Search, X } from "lucide-react";
+import { CalendarClock, CalendarDays, CircleAlert, Package, PencilLine, Search, X } from "lucide-react";
 import type { ReservationMaterial } from "../../../schema";
 import { SuccessToast } from "@/components/ui/success-toast";
 
@@ -28,6 +28,7 @@ type MesReservationsProps = {
   matosList: MatosOption[];
   currentUserId: string;
   reservationToEditId: number | null;
+  requestedReservationIsFinished: boolean;
 };
 
 function toLocalDateTimeParts(date: Date) {
@@ -47,6 +48,7 @@ export default function MesReservations({
   matosList,
   currentUserId,
   reservationToEditId,
+  requestedReservationIsFinished,
 }: MesReservationsProps) {
   const requestedReservation = reservations.find(
     (item) =>
@@ -191,10 +193,22 @@ export default function MesReservations({
         </div>
         <div className="flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-muted/30 px-5 text-center">
           <Package className="mb-2 size-6 text-muted-foreground/70" aria-hidden="true" />
-          <p className="text-sm font-medium">Aucune réservation à venir</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Vos prochaines réservations apparaîtront ici.
-          </p>
+          {requestedReservationIsFinished ? (
+            <div
+              role="alert"
+              className="flex items-center gap-3 rounded-xl border-2 border-destructive/40 bg-destructive/10 px-5 py-4 text-left text-destructive shadow-md"
+            >
+              <CircleAlert className="size-6 shrink-0" aria-hidden="true" />
+              <p className="text-base font-bold">Réservation finie</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm font-medium">Aucune réservation à venir</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Vos prochaines réservations apparaîtront ici.
+              </p>
+            </>
+          )}
         </div>
         {successMessage && <SuccessToast message={successMessage} />}
       </section>
@@ -216,6 +230,16 @@ export default function MesReservations({
           {reservations.length}
         </span>
       </div>
+
+      {requestedReservationIsFinished && (
+        <div
+          role="alert"
+          className="mb-4 flex items-center gap-3 rounded-xl border-2 border-destructive/40 bg-destructive/10 px-4 py-3 text-destructive shadow-md"
+        >
+          <CircleAlert className="size-6 shrink-0" aria-hidden="true" />
+          <p className="text-base font-bold">Réservation finie</p>
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
         {reservations.map((reservation) => {
