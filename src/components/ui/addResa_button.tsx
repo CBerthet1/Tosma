@@ -751,9 +751,6 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
                 )}
               </div>
             )}
-            {checkingAvailability && (
-              <p className="text-xs text-muted-foreground">Vérification de la disponibilité…</p>
-            )}
             {!hasValidDateRange && (
               <p className="text-xs text-muted-foreground">
                 Choisissez une date de début et de fin valides pour rechercher du matériel.

@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { getAvailableMatosQuantities } from "@/app/actions_serveur/newResa";
 import { updateResa } from "@/app/actions_serveur/UpdateResa";
+import { DeleteResa } from "@/app/actions_serveur/DeleteResa";
 import { Button } from "@/components/ui/button";
-import { CalendarClock, CalendarDays, CircleAlert, Package, PencilLine, Search, X } from "lucide-react";
+import { CalendarClock, CalendarDays, CircleAlert, Package, PencilLine, Search, Trash2, X } from "lucide-react";
 import type { ReservationMaterial } from "../../../schema";
 import { SuccessToast } from "@/components/ui/success-toast";
 
@@ -61,6 +62,7 @@ export default function MesReservations({
     () => requestedReservation?.id ?? null,
   );
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [selectedMatos, setSelectedMatos] = useState<Record<number, number>>(
@@ -108,9 +110,13 @@ export default function MesReservations({
 
   useEffect(() => {
     if (editingId === null) return;
-    document
-      .getElementById(`reservation-${editingId}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reservation = document.getElementById(`reservation-${editingId}`);
+    if (!reservation) return;
+
+    const bounds = reservation.getBoundingClientRect();
+    if (bounds.top < 0 || bounds.bottom > window.innerHeight) {
+      reservation.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }, [editingId]);
 
   useEffect(() => {
@@ -180,6 +186,31 @@ export default function MesReservations({
       setError(reason instanceof Error ? reason.message : "La modification a échoué.");
     } finally {
       setLoadingId(null);
+    }
+  };
+
+  const handleDelete = async (reservation: ReservationToEdit) => {
+    if (
+      !window.confirm(
+        "Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.",
+      )
+    ) {
+      return;
+    }
+
+    setError("");
+    setSuccessMessage(null);
+    setDeletingId(reservation.id);
+    try {
+      await DeleteResa(reservation.id);
+      setEditingId(null);
+      setSelectedMatos({});
+      setSearchQuery("");
+      setSuccessMessage("Réservation supprimée.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "La suppression a échoué.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -254,6 +285,7 @@ export default function MesReservations({
           const end = toLocalDateTimeParts(reservation.end);
           const isEditing = editingId === reservation.id;
           const isLoading = loadingId === reservation.id;
+          const isDeleting = deletingId === reservation.id;
           const canEdit = isAdmin || reservation.userId === currentUserId;
 
           return (
@@ -416,17 +448,15 @@ export default function MesReservations({
                             })}
                           </div>
                         )}
-                        {checkingAvailability && (
-                          <p className="text-xs text-muted-foreground">Vérification de la disponibilité…</p>
-                        )}
-                        {availabilityError && (
-                          <p role="alert" className="text-xs text-destructive">{availabilityError}</p>
-                        )}
-                        {hasInsufficientAvailability && !checkingAvailability && (
-                          <p role="alert" className="text-xs text-destructive">
-                            La quantité choisie dépasse le stock disponible pour ce créneau.
-                          </p>
-                        )}
+                        <div className="min-h-4">
+                          {availabilityError ? (
+                            <p role="alert" className="text-xs text-destructive">{availabilityError}</p>
+                          ) : !checkingAvailability && hasInsufficientAvailability ? (
+                            <p role="alert" className="text-xs text-destructive">
+                              La quantité choisie dépasse le stock disponible pour ce créneau.
+                            </p>
+                          ) : null}
+                        </div>
                       </>
                     ) : (
                       <p className="text-sm text-muted-foreground">Aucun matériel disponible.</p>
@@ -442,11 +472,21 @@ export default function MesReservations({
                       type="submit"
                       disabled={
                         isLoading ||
+                        isDeleting ||
                         (selectedMatosIds.length > 0 &&
                           (checkingAvailability || Boolean(availabilityError) || hasInsufficientAvailability))
                       }
                     >
                       {isLoading ? "Enregistrement..." : "Enregistrer"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => handleDelete(reservation)}
+                      disabled={isLoading || isDeleting}
+                    >
+                      <Trash2 className="size-3.5" aria-hidden="true" />
+                      {isDeleting ? "Suppression..." : "Supprimer"}
                     </Button>
                     <Button
                       type="button"
@@ -457,7 +497,7 @@ export default function MesReservations({
                         setSearchQuery("");
                         setError("");
                       }}
-                      disabled={isLoading}
+                      disabled={isLoading || isDeleting}
                     >
                       Annuler
                     </Button>
