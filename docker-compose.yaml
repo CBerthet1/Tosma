@@ -12,7 +12,7 @@ services:
       - DB_HOST=tosma_db_v2
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
-      - DB_NAME=${MYSQL_DATABASE}
+      - DB_NAME=tosma
 
   tosma_db_v2:
     image: mariadb:10.11
@@ -20,7 +20,7 @@ services:
     environment:
       # Injecte les identifiants pour l'initialisation de MariaDB
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: tosma_db_v2
+      MYSQL_DATABASE: tosma
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
