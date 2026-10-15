@@ -23,14 +23,21 @@ Les fichiers de configuration de Next.js, TypeScript et des outils associés res
 ## En local, attention c'est lancé sur le port 8084 donc localhost:8084 , et il faut migrate :
 
 ``` bash
+docker compose build 
+
+docker compose up -d
+
+``` 
+Attendre 3s pour que la db se lance
+``` bash
+docker exec -it tosma2-tosma_app_v2-1 pnpm drizzle-kit migrate
+
+docker compose down
+
 docker compose run --rm --service-ports tosma_app_v2 pnpm dev
-docker exec -it sitest-tosma_db_v2-1 pnpm drizzle-kit migrate
 
 ```
-
-
-
-
+Ouvrir localhost:8084 sur le navigateur
 
 Compte tests:
 admin: nom:"gg" mdp:"t"
