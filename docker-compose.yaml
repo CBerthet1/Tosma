@@ -20,7 +20,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    command: sh -c "pnpm drizzle-kit migrate && pnpm start"
+    command: sh -c "pnpm start"
 
   tosma_db_v2:
     image: mariadb:10.11

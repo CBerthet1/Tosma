@@ -20,12 +20,17 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Les fichiers de configuration de Next.js, TypeScript et des outils associés restent à la racine, à l'emplacement attendu par ces outils.
 
-## En local, attention c'est lancé sur le port 8084 donc localhost:8084 :
+## En local, attention c'est lancé sur le port 8084 donc localhost:8084 , et il faut migrate :
 
 ``` bash
 docker compose run --rm --service-ports tosma_app_v2 pnpm dev
+docker exec -it sitest-tosma_db_v2-1 pnpm drizzle-kit migrate
 
 ```
+
+
+
+
 
 Compte tests:
 admin: nom:"gg" mdp:"t"
