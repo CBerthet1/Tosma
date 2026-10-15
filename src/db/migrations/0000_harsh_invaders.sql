@@ -18,6 +18,5 @@ CREATE TABLE `resa` (
 	`user` varchar(63),
 	`user_display_name` varchar(255),
 	`matos` json NOT NULL,
-	`user_display_name` varchar(255),
 	CONSTRAINT `resa_id` PRIMARY KEY(`id`)
 );

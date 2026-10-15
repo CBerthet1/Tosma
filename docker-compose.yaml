@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   tosma_app_v2:
     restart: always
@@ -22,7 +20,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    command: sh -c "pnpm drizzle-kit push && pnpm start"
+    command: sh -c "pnpm drizzle-kit migrate && pnpm start"
 
   tosma_db_v2:
     image: mariadb:10.11
