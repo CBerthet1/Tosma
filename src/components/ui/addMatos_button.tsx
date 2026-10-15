@@ -110,21 +110,6 @@ export function BoutonAddMatos({ categories }: { categories: readonly Category[]
             />
           </div>
 
-          <div className="space-y-1.5 md:col-span-2">
-            <label htmlFor="matos-image" className="text-sm font-medium">
-              Image (URL)
-            </label>
-            <input
-              id="matos-image"
-              type="url"
-              value={values.image}
-              maxLength={255}
-              onChange={(event) => updateValue("image", event.target.value)}
-              placeholder="https://…"
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
           <div className="space-y-1.5">
             <label htmlFor="matos-quantity" className="text-sm font-medium">
               Quantité

@@ -220,18 +220,6 @@ export default function MatosInventory({
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="edit-material-image" className="text-sm font-medium">Image (URL)</label>
-                <input
-                  id="edit-material-image"
-                  type="url"
-                  value={values.image}
-                  maxLength={255}
-                  onChange={(event) => setField("image", event.target.value)}
-                  className={inputClassName}
-                />
-              </div>
-
-              <div className="space-y-1.5">
                 <label htmlFor="edit-material-quantity" className="text-sm font-medium">Quantité</label>
                 <input
                   id="edit-material-quantity"

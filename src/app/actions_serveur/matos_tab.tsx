@@ -21,12 +21,15 @@ export default async function Matos_tab({ isAdmin }: { isAdmin: boolean }) {
   })
     .from(matosTable)
     .orderBy(asc(matosTable.name));
+  const visibleMatos = matos_list.filter(
+    (matos) => matos.categorie.trim().toLocaleLowerCase("fr") !== "image",
+  );
 
   const matosByCategory = new Map<
     string,
     typeof matos_list
   >();
-  for (const matos of matos_list) {
+  for (const matos of visibleMatos) {
     const category = CATEGORIES.find(
       (name) => name.toLocaleLowerCase("fr") === matos.categorie.trim().toLocaleLowerCase("fr"),
     ) ?? matos.categorie;
@@ -41,7 +44,7 @@ export default async function Matos_tab({ isAdmin }: { isAdmin: boolean }) {
     ),
     ...CATEGORIES.slice(-2),
   ];
-  const categorizedItems = matos_list.map((matos) => ({
+  const categorizedItems = visibleMatos.map((matos) => ({
     ...matos,
     displayCategory: CATEGORIES.find(
       (name) => name.toLocaleLowerCase("fr") === matos.categorie.trim().toLocaleLowerCase("fr"),
