@@ -17,6 +17,12 @@ services:
       - DB_USER=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_NAME=tosma
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command: sh -c "pnpm drizzle-kit push && pnpm start"
 
   tosma_db_v2:
     image: mariadb:10.11

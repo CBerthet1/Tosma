@@ -20,6 +20,3 @@ RUN pnpm run build
 
 # 7. Information sur le port d'écoute
 EXPOSE 3000
-
-# 8. Commande d'exécution au démarrage du conteneur
-CMD ["pnpm", "start"]
