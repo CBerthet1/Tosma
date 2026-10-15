@@ -2,12 +2,16 @@ version: '3.8'
 
 services:
   tosma_app_v2:
+    restart: always
     build: .
     ports:
-      - "8084:3000" 
+      - "8084:3000"
     depends_on:
       - tosma_db_v2
+    env_file:
+      - .env
     environment:
+      - AUTH_TRUST_HOST=true
       - HOSTNAME=0.0.0.0
       - DB_HOST=tosma_db_v2
       - DB_USER=${MYSQL_USER}

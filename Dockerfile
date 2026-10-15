@@ -1,7 +1,7 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # 1. Activation de Corepack pour gérer pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@9
 
 # 2. Définition du répertoire de travail dans le conteneur
 WORKDIR /app
