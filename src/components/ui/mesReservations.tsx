@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAvailableMatosQuantities } from "@/app/actions_serveur/newResa";
 import { updateResa } from "@/app/actions_serveur/UpdateResa";
 import { DeleteResa } from "@/app/actions_serveur/DeleteResa";
@@ -70,6 +70,7 @@ export default function MesReservations({
       requestedReservation?.matos.map((item) => [item.matosId, item.quantity]) ?? [],
     ),
   );
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [editRange, setEditRange] = useState(() => {
@@ -107,6 +108,22 @@ export default function MesReservations({
       !selectedMatosIds.includes(matos.id) &&
       (matos.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false),
   );
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        searchContainerRef.current &&
+        event.target instanceof Node &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
 
   useEffect(() => {
     if (editingId === null) return;
@@ -362,14 +379,13 @@ export default function MesReservations({
                     </label>
                     {matosList.length > 0 ? (
                       <>
-                        <div className="relative">
+                        <div ref={searchContainerRef} className="relative">
                           <input
                             type="text"
                             placeholder="Rechercher du matériel..."
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                             onFocus={() => setIsSearchFocused(true)}
-                            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                             className="w-full rounded-xl border border-input bg-background px-3 py-2.5 pl-9 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                           />
                           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />

@@ -178,6 +178,7 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false); // Permet de savoir si on clique sur le champ
   const [categorie, setCategorie] = useState("");
@@ -195,6 +196,13 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
         !activePicker.trigger.contains(event.target)
       ) {
         activeDatePickerRef.current = null;
+      }
+      if (
+        searchContainerRef.current &&
+        event.target instanceof Node &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setIsFocused(false);
       }
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -669,12 +677,8 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
 
           {/* 4. Sélection du matériel avec champ de recherche */}
           <div
+            ref={searchContainerRef}
             className="relative space-y-2 pt-1"
-            onBlur={(event) => {
-              if (!(event.relatedTarget instanceof Node) || !event.currentTarget.contains(event.relatedTarget)) {
-                setIsFocused(false);
-              }
-            }}
           >
             <label className="flex items-center gap-2 text-sm font-semibold">
               <Package className="size-4 text-primary" aria-hidden="true" />
