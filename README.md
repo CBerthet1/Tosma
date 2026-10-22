@@ -34,7 +34,7 @@ docker exec -it tosma2-tosma_app_v2-1 pnpm drizzle-kit migrate
 
 docker compose down
 
-docker compose run --rm --service-ports tosma_app_v2 pnpm dev
+docker compose run --rm -e WATCHPACK_POLLING=true -v .:/app -v /app/node_modules --service-ports tosma_app_v2 pnpm dev
 
 ```
 Ouvrir localhost:8084 sur le navigateur

@@ -151,12 +151,12 @@ export function BoutonAddResa({ matosList = [], categories }: BoutonAddResaProps
   const [startDay, setStartDay] = useState(initialDate.getDate());
   const [startMonth, setStartMonth] = useState(initialDate.getMonth() + 1);
   const [startYear, setStartYear] = useState(initialDate.getFullYear());
-  const [startTime, setStartTime] = useState("09:00");
+  const [startTime, setStartTime] = useState(initialDate.getHours().toString().padStart(2, "0") + ":" + Math.floor(initialDate.getMinutes() / 15) * 15);
 
   const [endDay, setEndDay] = useState(initialDate.getDate());
   const [endMonth, setEndMonth] = useState(initialDate.getMonth() + 1);
   const [endYear, setEndYear] = useState(initialDate.getFullYear());
-  const [endTime, setEndTime] = useState("09:15");
+  const [endTime, setEndTime] = useState((initialDate.getHours()+1).toString().padStart(2, "0") + ":" + Math.floor(initialDate.getMinutes() / 15) * 15);
   const startDatePickerRef = useRef<HTMLInputElement>(null);
   const endDatePickerRef = useRef<HTMLInputElement>(null);
   const activeDatePickerRef = useRef<{
